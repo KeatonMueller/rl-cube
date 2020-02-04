@@ -1,3 +1,4 @@
+import torch
 import transformations
 import copy
 from enum import Enum
@@ -9,6 +10,13 @@ class Face(Enum):
     DOWN = 3
     FRONT = 4
     BACK = 5
+
+class Dir(Enum):
+    CW = 0
+    CCW = 1
+
+Faces = [ Face.RIGHT, Face.LEFT, Face.UP, Face.DOWN, Face.FRONT, Face.BACK ]
+Dirs = [ Dir.CW, Dir. CCW ]
 
 FACE_TO_TRANS = {
     Face.RIGHT: (transformations.R_CORNER_TRANS, transformations.R_EDGE_TRANS),
@@ -62,6 +70,7 @@ solved_cube_matrix = [
 '''
 solved_cube_arr = [ 0, 1, 2, 3, 20, 21, 22, 23, 0, 1, 2, 3, 20, 21, 22, 23, 9, 11, 17, 19 ]
 
+
 '''
     arr: a 1x20 representation of a Rubik's Cube
 
@@ -73,16 +82,36 @@ def arr_to_matrix(arr):
         matrix.append([1 if i == loc else 0 for i in range(24)])
     return matrix
 
+
+'''
+    arr: a 1x20 representation of a Rubik's Cube
+
+    returns a 1x480 (flattened 20x24) torch tensor representation of a Rubik's Cube
+'''
+def arr_to_tensor(arr):
+    tensor = torch.tensor([[]])
+    for loc in arr:
+        line = torch.tensor([[1.0 if i == loc else 0.0 for i in range(24)]])
+        tensor = torch.cat((tensor, line), 1)
+    return tensor
+
 '''
     face: one of the Face enums
-    dir: 0 for clockwise, 1 for counterclockwise
+    dir: one of the Dir enums
     cube: a 1x20 representation of a Rubik's Cube
+    undo: a boolean. True to undo the requested turn, False to perform it normally
 
     performs any single outer layer turn in any direction
 '''
-def turn(face, dir, cube):
+def turn(face, dir, cube, undo=False):
     # get transformation map for this face
     corner_trans, edge_trans = FACE_TO_TRANS[face]
+
+    # convert Dir enum to index into transformation maps
+    if undo:
+        dir = 1 if dir == Dir.CW else 0
+    else:
+        dir = 0 if dir == Dir.CW else 1
 
     # rotate corners
     for i in range(8):
@@ -92,18 +121,34 @@ def turn(face, dir, cube):
     for i in range(8, 20):
         cube[i] = edge_trans[dir][cube[i]] if cube[i] in edge_trans[dir] else cube[i]
 
+'''
+    returns a shallow copy of solved_cube_arr
+'''
+def get_cube_arr():
+    return copy.copy(solved_cube_arr)
+
+
+'''
+    cube: a 1x20 representation of a Rubik's Cube
+
+    returns 1 if the given cube is solved, -1 otherwise
+'''
+def R(cube):
+    return 1 if cube == solved_cube_arr else -1
+
+
 if __name__ == "__main__":
-    cube = copy.copy(solved_cube_arr)
+    cube = get_cube_arr()
     print(cube)
-    turn(Face.RIGHT, 1, cube)
+    turn(Face.RIGHT, Dir.CCW, cube)
     print(cube)
-    turn(Face.LEFT, 0, cube)
+    turn(Face.LEFT, Dir.CW, cube)
     print(cube)
-    turn(Face.FRONT, 1, cube)
+    turn(Face.FRONT, Dir.CCW, cube)
     print(cube)
-    turn(Face.UP, 1, cube)
+    turn(Face.UP, Dir.CCW, cube)
     print(cube)
-    turn(Face.DOWN, 0, cube)
+    turn(Face.DOWN, Dir.CW, cube)
     print(cube)
-    turn(Face.BACK, 0, cube)
+    turn(Face.BACK, Dir.CW, cube)
     print(cube)
