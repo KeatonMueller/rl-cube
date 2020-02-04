@@ -1,4 +1,4 @@
-import turns
+import transformations
 import copy
 from enum import Enum
 
@@ -11,12 +11,12 @@ class Face(Enum):
     BACK = 5
 
 FACE_TO_TRANS = {
-    Face.RIGHT: (turns.R_CORNER_TRANS, turns.R_EDGE_TRANS),
-    Face.LEFT: (turns.L_CORNER_TRANS, turns.L_EDGE_TRANS),
-    Face.UP: (turns.U_CORNER_TRANS, turns.U_EDGE_TRANS),
-    Face.DOWN: (turns.D_CORNER_TRANS, turns.D_EDGE_TRANS),
-    Face.FRONT: (turns.F_CORNER_TRANS, turns.F_EDGE_TRANS),
-    Face.BACK: (turns.B_CORNER_TRANS, turns.B_EDGE_TRANS)
+    Face.RIGHT: (transformations.R_CORNER_TRANS, transformations.R_EDGE_TRANS),
+    Face.LEFT: (transformations.L_CORNER_TRANS, transformations.L_EDGE_TRANS),
+    Face.UP: (transformations.U_CORNER_TRANS, transformations.U_EDGE_TRANS),
+    Face.DOWN: (transformations.D_CORNER_TRANS, transformations.D_EDGE_TRANS),
+    Face.FRONT: (transformations.F_CORNER_TRANS, transformations.F_EDGE_TRANS),
+    Face.BACK: (transformations.B_CORNER_TRANS, transformations.B_EDGE_TRANS)
 }
 '''
     20x24 representation of a Rubik's Cube
@@ -54,6 +54,11 @@ solved_cube_matrix = [
     0 <= arr[i] < 24 for all i
     index refers to one of the 20 stickers needed to determine the state of all 54 stickers
     value at that index refers to the position of that sticker
+
+    order of indices is
+        Corners A, B, C, D, U, V, W, X
+        Edges A, B, C, D, U, V, W, X, J, L, R, T
+    which can also be seen in the matrix format above
 '''
 solved_cube_arr = [ 0, 1, 2, 3, 20, 21, 22, 23, 0, 1, 2, 3, 20, 21, 22, 23, 9, 11, 17, 19 ]
 
@@ -90,15 +95,15 @@ def turn(face, dir, cube):
 if __name__ == "__main__":
     cube = copy.copy(solved_cube_arr)
     print(cube)
-    turn(Face.RIGHT, 0, cube)
+    turn(Face.RIGHT, 1, cube)
     print(cube)
-    turn(Face.LEFT, 1, cube)
+    turn(Face.LEFT, 0, cube)
     print(cube)
-    turn(Face.FRONT, 0, cube)
+    turn(Face.FRONT, 1, cube)
     print(cube)
-    turn(Face.UP, 0, cube)
+    turn(Face.UP, 1, cube)
     print(cube)
-    turn(Face.DOWN, 1, cube)
+    turn(Face.DOWN, 0, cube)
     print(cube)
-    turn(Face.BACK, 1, cube)
+    turn(Face.BACK, 0, cube)
     print(cube)
