@@ -3,6 +3,10 @@ import transformations
 import copy
 from enum import Enum
 
+'''
+    Face enum
+    the six outer layers on a Rubik's Cube
+'''
 class Face(Enum):
     RIGHT = 0
     LEFT = 1
@@ -11,13 +15,24 @@ class Face(Enum):
     FRONT = 4
     BACK = 5
 
+'''
+    Dir enum
+    either CW for clockwise or CCW for counterclockwise
+'''
 class Dir(Enum):
     CW = 0
     CCW = 1
 
+'''
+    arrays containing the Face and Dir enums
+'''
 Faces = [ Face.RIGHT, Face.LEFT, Face.UP, Face.DOWN, Face.FRONT, Face.BACK ]
 Dirs = [ Dir.CW, Dir. CCW ]
 
+'''
+    a map from a Face enum to the corresponding transformation maps needed to
+    rotate that face in either direction
+'''
 FACE_TO_TRANS = {
     Face.RIGHT: (transformations.R_CORNER_TRANS, transformations.R_EDGE_TRANS),
     Face.LEFT: (transformations.L_CORNER_TRANS, transformations.L_EDGE_TRANS),
@@ -32,6 +47,8 @@ FACE_TO_TRANS = {
         locations for an edge or corner sticker
     y-axis are the 20 stickers we need to keep track of to deterministically track the
         state of all 54 stickers
+
+    this is here mainly for reference
 '''
 solved_cube_matrix = [
    # A  B  C  D  E  F  G  H  I  J  K  L  M  N  O  P  Q  R  S  T  U  V  W  X
@@ -57,6 +74,7 @@ solved_cube_matrix = [
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0], # OG
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0], # OB
 ]
+
 '''
     1x20 representation of a Rubik's Cube
     0 <= arr[i] < 24 for all i
@@ -70,85 +88,83 @@ solved_cube_matrix = [
 '''
 solved_cube_arr = [ 0, 1, 2, 3, 20, 21, 22, 23, 0, 1, 2, 3, 20, 21, 22, 23, 9, 11, 17, 19 ]
 
-
-'''
-    arr: a 1x20 representation of a Rubik's Cube
-
-    returns the 20x24 one-hot encoding representation of the given 1x20 representation
-'''
 def arr_to_matrix(arr):
+    '''
+        arr: a 1x20 representation of a Rubik's Cube
+
+        returns the 20x24 one-hot encoding representation of the given 1x20 representation
+    '''
     matrix = []
     for loc in arr:
         matrix.append([1 if i == loc else 0 for i in range(24)])
     return matrix
 
 
-'''
-    arr: a 1x20 representation of a Rubik's Cube
+class Cube():
+    def __init__(self):
+        '''
+            initializes cube in the solved state
+            performs a shallow copy of solved_cube_arr
+        '''
+        self.arr = copy.copy(solved_cube_arr)
 
-    returns a 1x480 (flattened 20x24) torch tensor representation of a Rubik's Cube
-'''
-def arr_to_tensor(arr):
-    tensor = torch.tensor([[]])
-    for loc in arr:
-        line = torch.tensor([[1.0 if i == loc else 0.0 for i in range(24)]])
-        tensor = torch.cat((tensor, line), 1)
-    return tensor
+    def turn(self, face, dir, undo=False):
+        '''
+            performs any single outer layer turn in any direction
 
-'''
-    face: one of the Face enums
-    dir: one of the Dir enums
-    cube: a 1x20 representation of a Rubik's Cube
-    undo: a boolean. True to undo the requested turn, False to perform it normally
+            face: one of the Face enums
+            dir: one of the Dir enums
+            undo: if True, undo the given move. defaults to False
+        '''
+        # get transformation map for this face
+        corner_trans, edge_trans = FACE_TO_TRANS[face]
 
-    performs any single outer layer turn in any direction
-'''
-def turn(face, dir, cube, undo=False):
-    # get transformation map for this face
-    corner_trans, edge_trans = FACE_TO_TRANS[face]
+        # convert Dir enum to index into transformation maps
+        dir = 0 if dir == Dir.CW else 1
+        # swap the direction if asked to undo
+        if undo:
+            dir = 1 - dir
 
-    # convert Dir enum to index into transformation maps
-    dir = 0 if dir == Dir.CW else 1
-    # swap the direction if asked to undo
-    if undo:
-        dir = 1 - dir
+        # rotate corners
+        for i in range(8):
+            self.arr[i] = corner_trans[dir][self.arr[i]] if self.arr[i] in corner_trans[dir] else self.arr[i]
 
-    # rotate corners
-    for i in range(8):
-        cube[i] = corner_trans[dir][cube[i]] if cube[i] in corner_trans[dir] else cube[i]
+        # rotate edges
+        for i in range(8, 20):
+            self.arr[i] = edge_trans[dir][self.arr[i]] if self.arr[i] in edge_trans[dir] else self.arr[i]
 
-    # rotate edges
-    for i in range(8, 20):
-        cube[i] = edge_trans[dir][cube[i]] if cube[i] in edge_trans[dir] else cube[i]
+    def to_tensor(self):
+        '''
+            returns 1x480 (flattened 20x24) torch tensor representation of the Rubik's Cube
+        '''
+        tensor = torch.tensor([[]])
+        for loc in self.arr:
+            line = torch.tensor([[1.0 if i == loc else 0.0 for i in range(24)]])
+            tensor = torch.cat((tensor, line), 1)
+        return tensor
 
-'''
-    returns a shallow copy of solved_cube_arr
-'''
-def get_cube_arr():
-    return copy.copy(solved_cube_arr)
+    def get_arr(self):
+        '''
+            returns 1x20 array representation of the Rubik's Cube
+        '''
+        return self.arr
 
+    def is_solved(self):
+        '''
+            returns True if cube is solved
+            returns False otherwise
+        '''
+        return self.arr == solved_cube_arr
 
-'''
-    cube: a 1x20 representation of a Rubik's Cube
+    def reward(self):
+        '''
+            returns 1 if the cube is solved
+            returns -1 otherwise
+        '''
+        return 1 if self.is_solved() else -1
 
-    returns 1 if the given cube is solved, -1 otherwise
-'''
-def R(cube):
-    return 1 if cube == solved_cube_arr else -1
-
-
-if __name__ == "__main__":
-    cube = get_cube_arr()
-    print(cube)
-    turn(Face.RIGHT, Dir.CCW, cube)
-    print(cube)
-    turn(Face.LEFT, Dir.CW, cube)
-    print(cube)
-    turn(Face.FRONT, Dir.CCW, cube)
-    print(cube)
-    turn(Face.UP, Dir.CCW, cube)
-    print(cube)
-    turn(Face.DOWN, Dir.CW, cube)
-    print(cube)
-    turn(Face.BACK, Dir.CW, cube)
-    print(cube)
+    def reset(self):
+        '''
+            resets the cube to the solved state
+        '''
+        self.arr = copy.copy(solved_cube_arr)

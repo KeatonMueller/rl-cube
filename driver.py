@@ -15,11 +15,12 @@ from cube_net import CubeNet
 def generate_training_data(num, length, net):
     X = []
     Y = []
+    cube = C.Cube()
     for i in range(num):
-        cube = C.get_cube_arr()
+        cube.reset()
         for j in range(length):
             # perform a random turn
-            C.turn(random.choice(C.Faces), random.choice(C.Dirs), cube)
+            cube.turn(random.choice(C.Faces), random.choice(C.Dirs))
 
             # list to store values of 12 children
             v_x = []
@@ -28,14 +29,14 @@ def generate_training_data(num, length, net):
             for face in C.Faces:
                 for dir in C.Dirs:
                     # perform one turn
-                    C.turn(face, dir, cube)
+                    cube.turn(face, dir)
                     # evaluate resulting position
                     with torch.no_grad():
-                        v, p = net(C.arr_to_tensor(cube))
+                        v, p = net(cube.to_tensor())
                     # append value and reward for being in this position
-                    v_x.append(C.R(cube) + v.item())
+                    v_x.append(cube.reward() + v.item())
                     # undo turn
-                    C.turn(face, dir, cube, True)
+                    cube.turn(face, dir, True)
 
             best_val, best_i = (float('-inf'), -1)
             for i in range(len(v_x)):
@@ -43,14 +44,15 @@ def generate_training_data(num, length, net):
                     best_val = v_x[i]
                     best_i = i
 
+            # this happens when the weights explode
             if best_i == -1:
                 import pdb; pdb.set_trace()
 
+            # get labels for inputs
             y_v = torch.tensor([[best_val]])
-            # y_p = torch.tensor([[1 if i == best_i else 0 for i in range(len(v_x))]])
             y_p = torch.tensor([best_i])
 
-            X.append(C.arr_to_tensor(cube))
+            X.append(cube.to_tensor())
             Y.append((y_v, y_p))
 
     return (X, Y)
@@ -64,7 +66,7 @@ if __name__ == "__main__":
     SCRAMBLE_LENGTH = 1
 
     net = CubeNet()
-    optimizer = optim.SGD(net.parameters(), lr=0.1)
+    optimizer = optim.SGD(net.parameters(), lr=0.05)
 
     for period in range(PERIODS):
         print('period', period)
@@ -109,19 +111,19 @@ if __name__ == "__main__":
             for dir1 in C.Dirs:
                 # for face2 in C.Faces:
                 #     for dir2 in C.Dirs:
-                cube = C.get_cube_arr()
-                C.turn(face1, dir1, cube)
-                # C.turn(face2, dir2, cube)
+                cube = C.Cube()
+                cube.turn(face1, dir1)
+                # cube.turn(face2, dir2)
 
-                out_v, out_p = net(C.arr_to_tensor(cube))
+                out_v, out_p = net(cube.to_tensor())
                 (f1, d1) = idx_to_move[torch.argmax(out_p).item()]
-                C.turn(f1, d1, cube)
+                cube.turn(f1, d1)
 
-                # out_v, out_p = net(C.arr_to_tensor(cube))
+                # out_v, out_p = net(cube.to_tensor())
                 # (f2, d2) = idx_to_move[torch.argmax(out_p).item()]
-                # C.turn(f2, d2, cube)
+                # cube.turn(f2, d2)
 
-                if(cube == C.solved_cube_arr):
+                if(cube.is_solved()):
                     print('SOLVED!')
                 else:
                     print(cube)
