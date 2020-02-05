@@ -10,22 +10,30 @@ class CubeNet(nn.Module):
 
         # value branch
         self.h2_v = nn.Linear(2048, 512)
-        self.output_v = nn.Linear(512, 1)
+        self.out_v = nn.Linear(512, 1)
 
         # policy branch
         self.h2_p = nn.Linear(2048, 512)
-        self.output_p = nn.Linear(512, 12)
+        self.out_p = nn.Linear(512, 12)
+
+        # initialize all weights with Glorot initialization
+        nn.init.xavier_uniform_(self.input.weight)
+        nn.init.xavier_uniform_(self.h1.weight)
+        nn.init.xavier_uniform_(self.h2_v.weight)
+        nn.init.xavier_uniform_(self.h2_p.weight)
+        nn.init.xavier_uniform_(self.out_v.weight)
+        nn.init.xavier_uniform_(self.out_p.weight)
 
     def forward(self, x):
-        x = F.relu(self.input(x))
-        x = F.relu(self.h1(x))
+        x = F.leaky_relu(self.input(x))
+        x = F.leaky_relu(self.h1(x))
 
         # value branch
-        x_v = F.relu(self.h2_v(x))
-        x_v = F.log_softmax(self.output_v(x_v), dim=1)
+        x_v = F.leaky_relu(self.h2_v(x))
+        out_v = F.softmax(self.out_v(x_v), dim=1)
 
         # policy branch
-        x_p = F.relu(self.h2_p(x))
-        x_p = F.relu(self.output_p(x_p))
+        x_p = F.leaky_relu(self.h2_p(x))
+        out_p = F.leaky_relu(self.out_p(x_p))
 
-        return (x_v, x_p)
+        return (out_v, out_p)

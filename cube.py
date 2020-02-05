@@ -108,10 +108,10 @@ def turn(face, dir, cube, undo=False):
     corner_trans, edge_trans = FACE_TO_TRANS[face]
 
     # convert Dir enum to index into transformation maps
+    dir = 0 if dir == Dir.CW else 1
+    # swap the direction if asked to undo
     if undo:
-        dir = 1 if dir == Dir.CW else 0
-    else:
-        dir = 0 if dir == Dir.CW else 1
+        dir = 1 - dir
 
     # rotate corners
     for i in range(8):
