@@ -1,0 +1,13 @@
+Results using just policy, no MCTS yet
+
+	- with SGD optimizer and lr = 0.1, solved 12 out of 12 1-move scrambles
+		- periods = 5, epochs = 5, batch size = 1
+
+	- with SGD optimizer and lr = 0.01, solved 113 out of 144 2-move scrambles
+		- periods = 10, epochs = 50, batch size = 1
+
+
+To-Do:
+	- add batching
+	- add cuda utilization
+	- add MCTS using trained network

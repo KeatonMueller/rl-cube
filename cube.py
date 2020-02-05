@@ -116,7 +116,7 @@ class Cube():
             dir: one of the Dir enums
             undo: if True, undo the given move. defaults to False
         '''
-        # get transformation map for this face
+        # get transformation maps for this face
         corner_trans, edge_trans = FACE_TO_TRANS[face]
 
         # convert Dir enum to index into transformation maps
