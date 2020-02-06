@@ -101,12 +101,18 @@ def arr_to_matrix(arr):
 
 
 class Cube():
-    def __init__(self):
+    def __init__(self, cube=None):
         '''
-            initializes cube in the solved state
-            performs a shallow copy of solved_cube_arr
+            initializes a Rubik's Cube
+
+            cube - a Cube object to copy state from
+                   if not provided, the cube is initialized
+                   in the solved state
         '''
-        self.arr = copy.copy(solved_cube_arr)
+        if cube:
+            self.arr = copy.copy(cube.arr)
+        else:
+            self.arr = copy.copy(solved_cube_arr)
 
     def turn(self, face, dir, undo=False):
         '''
