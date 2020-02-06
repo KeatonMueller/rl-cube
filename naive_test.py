@@ -34,7 +34,7 @@ def naive_test(net, length):
         'total': 0
     }
     naive_test_helper(net, C.Cube(), length, length, stats)
-    print('solved', stats['hits'], 'out of', stats['total'])
+    print('solved', stats['hits'], 'out of', stats['total'], '(' + str(round(stats['hits'] / stats['total'], 4)*100) + '%)', str(length) + '-move scrambles')
 
 def naive_test_helper(net, cube, curr_len, orig_len, stats):
     '''
