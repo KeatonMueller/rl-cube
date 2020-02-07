@@ -11,6 +11,7 @@ from naive_test import naive_test
 def generate_training_data(num, length, net):
     '''
         generates an array of scrambled cubes of length (num * length)
+        as well as and array of (value, policy) labels for each cube
 
         num: number of cubes to scramble
         length: length of scramble per cube
