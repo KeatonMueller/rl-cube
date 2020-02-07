@@ -2,9 +2,11 @@ import torch
 import torch.optim as optim
 import torch.nn.functional as F
 import random, copy
+import argparse
+
 import cube as C
 from cube_net import CubeNet
-import naive_test
+from naive_test import naive_test
 
 def generate_training_data(num, length, net):
     '''
@@ -14,11 +16,16 @@ def generate_training_data(num, length, net):
         length: length of scramble per cube
         net: a CubeNet used to label the generated examples
     '''
+    # enter eval mode (network shouldn't be training during this)
+    net.eval()
+    # lists for generated input and labels
     X = []
     Y = []
     cube = C.Cube()
+    # for `num` number of cubes
     for i in range(num):
         cube.reset()
+        # for `length` number of turns
         for j in range(length):
             # perform a random turn
             cube.turn(random.choice(C.Faces), random.choice(C.Dirs))
@@ -62,40 +69,86 @@ def generate_training_data(num, length, net):
 
 
 if __name__ == "__main__":
-    PERIODS = 5     # number of times to generate new training data
-    EPOCHS = 10      # number of times to evaluate all of the training data per period
+    parser = argparse.ArgumentParser(description = 'Run rl-cube')
+    parser.add_argument('-p', '--periods', type=int, help='number of times to generate new training data')
+    parser.add_argument('-e', '--epochs', type=int, help='number of times to evaluate all of the training data per period')
+    parser.add_argument('-n', '--number', type=int, help='number of cubes to scramble per data generation')
+    parser.add_argument('-l', '--length', type=int, help='length of each scramble')
+    parser.add_argument('-r', '--learning_rate', type=float, help='learning rate of optimizer')
+    parser.add_argument('-t', '--test', type=str, nargs='+', help='what kinds of tests to run (ex: naive)')
+    parser.add_argument('--load', metavar='PATH', type=str, help='load model parameters from a file')
+    parser.add_argument('--save', metavar='PATH', type=str, help='save model parameters to a file')
+    args = parser.parse_args()
 
-    NUM_SCRAMBLES = 50      # number of scrambles per data generation
-    SCRAMBLE_LENGTH = 2     # length of each scramble
+    # number of times to generate new training data
+    PERIODS = args.periods if args.periods else 5
+    # number of times to evaluate all of the training data per period
+    EPOCHS = args.epochs if args.epochs else 5
+    # number of scrambles per data generation
+    NUM_SCRAMBLES = args.number if args.number else 50
+    # length of each scramble
+    SCRAMBLE_LENGTH = args.length if args.length else 1
+    # learning rate of optimizer
+    LR = args.learning_rate if args.learning_rate else 0.01
 
+    # initialize CubeNet and optimizer
     net = CubeNet()
-    optimizer = optim.SGD(net.parameters(), lr=0.01)
+    optimizer = optim.SGD(net.parameters(), lr=LR)
 
-    for period in range(PERIODS):
-        print('period', period)
-        # generate new training data
-        X, Y = generate_training_data(NUM_SCRAMBLES, SCRAMBLE_LENGTH, net)
+    # load model parameters if arg exists
+    if(args.load):
+        # load pretrained model
+        yo = torch.load(args.load)
+        net.load_state_dict(yo['model_state_dict'])
+        optimizer.load_state_dict(yo['optimizer_state_dict'])
+        net.eval()
 
-        for epoch in range(EPOCHS):
-            print('\t\tepoch', epoch, end=' ')
-            for x, y in zip(X, Y):
-                # get expected output
-                y_v, y_p = y
+    # otherwise train model
+    else:
+        for period in range(PERIODS):
+            print('period:', period)
+            # generate new training data
+            X, Y = generate_training_data(NUM_SCRAMBLES, SCRAMBLE_LENGTH, net)
 
-                # calculate network's output
-                net.zero_grad()
-                out_v, out_p = net(x)
+            # enter training mode
+            net.train()
+            for epoch in range(EPOCHS):
+                print('\t\tepoch:', epoch, end='\t')
+                for x, y in zip(X, Y):
+                    # get expected output
+                    y_v, y_p = y
 
-                # compute and sum loss
-                loss_v = F.mse_loss(out_v, y_v)
-                loss_p = F.cross_entropy(out_p, y_p)
-                loss = loss_v + loss_p
+                    # calculate network's output
+                    net.zero_grad()
+                    out_v, out_p = net(x)
 
-                # update weights
-                loss.backward()
-                optimizer.step()
+                    # compute and sum loss
+                    loss_v = F.mse_loss(out_v, y_v)
+                    loss_p = F.cross_entropy(out_p, y_p)
+                    loss = loss_v + loss_p
 
-            print('loss', loss)
+                    # update weights
+                    loss.backward()
+                    optimizer.step()
 
-    # run a naive test of the network
-    naive_test.naive_test(net, SCRAMBLE_LENGTH)
+                # report loss
+                print('loss:', loss.item())
+
+    # run tests (if any)
+    if(args.test):
+        if('none' in args.test):
+            # if none specified, don't run any tests
+            pass
+        elif('naive' in args.test):
+            # run a naive test if specified
+            naive_test(net, SCRAMBLE_LENGTH)
+    else:
+        # default to running a naive test
+        naive_test(net, SCRAMBLE_LENGTH)
+
+    # save model if arg exists
+    if(args.save):
+        torch.save({
+            'model_state_dict': net.state_dict(),
+            'optimizer_state_dict': optimizer.state_dict()
+        }, args.save)
