@@ -11,8 +11,24 @@ Results using naive tests
 Results using mcts tests
 	- with SGD optimizer and lr = 0.1, solved 122 out of 144 2-move scrambles
 		- periods = 5, epochs = 5, batch size = 1
-		- NUM_SCRAMBLES = 50, SCRAMBLE_LENGTH = 1 ** but only trained it on one move scrambles!
+		- time_limit = 5
+		- NUM_SCRAMBLES = 50, SCRAMBLE_LENGTH = 1 ** only trained it on one move scrambles!
+
+Time to train
+	- periods = 10, epochs = 50, batch size = 1
+	- NUM_SCRAMBLES = 50, SCRAMBLE_LENGTH = 2
+		- about 23:30 to train
+
+	- periods = 20, epochs = 50, batch size = 1
+	- NUM_SCRAMBLES = 50, SCRAMBLE_LENGTH = 2
+		- about 47:00 to train
+
+	- so to target about 9 hours of training, roughly
+		- periods = 230, epochs = 50, batch size = 1
+		- NUM_SCRAMBLES = 50, SCRAMBLE_LENGTH = 2
 To-Do:
 	- add batching
 	- add cuda utilization
 	- add BFS following MCTS to shorten solution lengths
+
+tmux running on giraffe
