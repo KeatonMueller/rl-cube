@@ -77,7 +77,7 @@ if __name__ == "__main__":
     parser.add_argument('-n', '--number', type=int, default=50, help='number of cubes to scramble per data generation')
     parser.add_argument('-l', '--length', type=int, default=2, help='length of each scramble')
     parser.add_argument('-r', '--learning_rate', type=float, default=0.01, help='learning rate of optimizer')
-    parser.add_argument('-t', '--test', type=str, nargs='+', default='[naive]', help='what kinds of tests to run (ex: naive)')
+    parser.add_argument('-t', '--test', type=str, nargs='+', default='[naive]', help='what kinds of tests to run (like `naive` or `mcts`)')
     parser.add_argument('--load', metavar='PATH', type=str, help='load model parameters from a file')
     parser.add_argument('--save', metavar='PATH', type=str, help='save model parameters to a file')
     args = parser.parse_args()
@@ -144,7 +144,7 @@ if __name__ == "__main__":
             naive_test(net, SCRAMBLE_LENGTH)
         if('mcts' in args.test):
             # run a mcts test
-            mcts_test(net, SCRAMBLE_LENGTH, 100)
+            mcts_test(net, SCRAMBLE_LENGTH, 5)
     # save model if arg exists
     if(args.save):
         torch.save({

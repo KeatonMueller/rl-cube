@@ -1,6 +1,7 @@
 import torch
 import random, math
 from math import sqrt
+from time import time
 
 import cube as C
 
@@ -61,22 +62,22 @@ class Node:
         self.is_terminal = cube.is_solved()
         self.is_fully_expanded = self.is_terminal
 
-def mcts_test(net, length, n):
+def mcts_test(net, length, time_limit):
     '''
         uses MCTS to test the network on every scramble of the requested length
 
         net: a CubeNet network
         length: the length of the scramble to attempt to solve
-        n: the number of tree traversals allowed before abandoning the solve attempt
+        time_limit: the time limit for each mcts attempt at solving a cube
     '''
     stats = {
         'hits': 0,
         'total': 0
     }
-    mcts_test_helper(net, C.Cube(), length, length, stats, n)
+    mcts_test_helper(net, C.Cube(), length, length, stats, time_limit)
     print('mcts test: solved', stats['hits'], 'out of', stats['total'], '(' + str(round(stats['hits'] / stats['total'] * 100, 2)) + '%)', str(length) + '-move scrambles')
 
-def mcts_test_helper(net, cube, curr_len, orig_len, stats, n):
+def mcts_test_helper(net, cube, curr_len, orig_len, stats, time_limit):
     '''
         performs all 12 possible moves and either attempts a solve
         afterwards or recursively calls itself to further scramble the cube
@@ -86,6 +87,7 @@ def mcts_test_helper(net, cube, curr_len, orig_len, stats, n):
         curr_len: the number of turns remaining in the scramble
         orig_len: the number of turns in the eventual scramble
         stats: a dict tracking solved cubes and total attempts
+        time_limit: the time limit for each mcts attempt at solving a cube
     '''
     for face_ in C.Faces:
         for dir_ in C.Dirs:
@@ -93,14 +95,14 @@ def mcts_test_helper(net, cube, curr_len, orig_len, stats, n):
             cube.turn(face_, dir_)
             if(curr_len == 1):
                 # if no more turns needed, attempt a solve
-                attempt_solve(net, C.Cube(cube), n, stats)
+                attempt_solve(net, C.Cube(cube), time_limit, stats)
             else:
                 # otherwise recurse and keep scrambling
-                mcts_test_helper(net, cube, curr_len-1, orig_len, stats, n)
+                mcts_test_helper(net, cube, curr_len-1, orig_len, stats, time_limit)
             # undo the turn
             cube.turn(face_, dir_, True)
 
-def attempt_solve(net, cube, n, stats):
+def attempt_solve(net, cube, time_limit, stats):
     '''
         attempts to solve the cube within a set number of
         tree traversals using MCTS
@@ -112,7 +114,8 @@ def attempt_solve(net, cube, n, stats):
     '''
     tree = Tree(cube, net)
     solved = False
-    for i in range(n):
+    start_time = time()
+    while(time() - start_time < time_limit):
         leaf = traverse(tree.root)
         if(leaf.cube.is_solved()):
             solved = True
@@ -121,6 +124,8 @@ def attempt_solve(net, cube, n, stats):
         else:
             expand(leaf)
             update_statistics(leaf, get_value(leaf))
+    else:
+        print('failed solve')
 
     if(solved):
         stats['hits'] += 1
@@ -132,6 +137,7 @@ def get_length(node, n):
         returns the length of the solution found by mcts
 
         node: the node corresponding to the solved cube state
+        n: the length calculated so far
     '''
     if(len(node.parents) == 0):
         return n
