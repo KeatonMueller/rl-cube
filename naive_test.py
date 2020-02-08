@@ -1,10 +1,10 @@
 import torch
+
 import cube as C
 
 '''
-    a map from move index to the corresponding Face and Dir
-    enums. the index refers to the argmax of the output of
-    CubeNet's policy branch
+    a map from move index to the corresponding Face and Dir enums
+    the order corresponds to the CubeNet's policy branch output
 '''
 idx_to_move = {
     0: (C.Face.RIGHT, C.Dir.CW),
@@ -26,26 +26,26 @@ def naive_test(net, length):
         naively tests (that is, uses the policy network alone without MCTS)
         the network on every scramble of the requested length
 
-        net - a CubeNet network
-        length - the length of the scramble to attempt to solve
+        net: a CubeNet network
+        length: the length of the scramble to attempt to solve
     '''
     stats = {
         'hits': 0,
         'total': 0
     }
     naive_test_helper(net, C.Cube(), length, length, stats)
-    print('solved', stats['hits'], 'out of', stats['total'], '(' + str(round(stats['hits'] / stats['total'] * 100, 2)) + '%)', str(length) + '-move scrambles')
+    print('naive test: solved', stats['hits'], 'out of', stats['total'], '(' + str(round(stats['hits'] / stats['total'] * 100, 2)) + '%)', str(length) + '-move scrambles')
 
 def naive_test_helper(net, cube, curr_len, orig_len, stats):
     '''
         performs all 12 possible moves and either attempts a solve
         afterwards or recursively calls itself to further scramble the cube
 
-        net - a CubeNet network
-        cube - a Cube object currently being scrambled
-        curr_len - the number of turns remaining in the scramble
-        orig_len - the number of turns in the eventual scramble
-        stats - a dict tracking solved cubes and total attempts
+        net: a CubeNet network
+        cube: a Cube object currently being scrambled
+        curr_len: the number of turns remaining in the scramble
+        orig_len: the number of turns in the eventual scramble
+        stats: a dict tracking solved cubes and total attempts
     '''
     for face_ in C.Faces:
         for dir_ in C.Dirs:
@@ -65,10 +65,10 @@ def attempt_solve(net, cube, length, stats):
         attempts to solve the given cube using the given network using
         the given number of turns
 
-        net - a CubeNet network used to attempt the solve
-        cube - a Cube object that we will try to solve
-        length - the number of turns used to scramble the cube
-        stats - a dict tracking solved cubes and total attempts
+        net: a CubeNet network used to attempt the solve
+        cube: a Cube object that we will try to solve
+        length: the number of turns used to scramble the cube
+        stats: a dict tracking solved cubes and total attempts
     '''
     with torch.no_grad():
         for i in range(length):

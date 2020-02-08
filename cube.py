@@ -1,7 +1,8 @@
 import torch
-import transformations
 import copy
 from enum import Enum
+
+import transformations
 
 '''
     Face enum
@@ -41,6 +42,26 @@ FACE_TO_TRANS = {
     Face.FRONT: (transformations.F_CORNER_TRANS, transformations.F_EDGE_TRANS),
     Face.BACK: (transformations.B_CORNER_TRANS, transformations.B_EDGE_TRANS)
 }
+
+'''
+    a map from move index to the corresponding Face and Dir enums
+    the order corresponds to the CubeNet's policy branch output
+'''
+idx_to_move = {
+    0: (Face.RIGHT, Dir.CW),
+    1: (Face.RIGHT, Dir.CCW),
+    2: (Face.LEFT, Dir.CW),
+    3: (Face.LEFT, Dir.CCW),
+    4: (Face.UP, Dir.CW),
+    5: (Face.UP, Dir.CCW),
+    6: (Face.DOWN, Dir.CW),
+    7: (Face.DOWN, Dir.CCW),
+    8: (Face.FRONT, Dir.CW),
+    9: (Face.FRONT, Dir.CCW),
+    10: (Face.BACK, Dir.CW),
+    11: (Face.BACK, Dir.CCW),
+}
+
 '''
     20x24 representation of a Rubik's Cube
     x-axis is the letter notation assigned to each sticker, indicating the 24 possible
@@ -90,9 +111,9 @@ solved_cube_arr = [ 0, 1, 2, 3, 20, 21, 22, 23, 0, 1, 2, 3, 20, 21, 22, 23, 9, 1
 
 def arr_to_matrix(arr):
     '''
-        arr: a 1x20 representation of a Rubik's Cube
-
         returns the 20x24 one-hot encoding representation of the given 1x20 representation
+
+        arr: a 1x20 representation of a Rubik's Cube
     '''
     matrix = []
     for loc in arr:
@@ -105,7 +126,7 @@ class Cube():
         '''
             initializes a Rubik's Cube
 
-            cube - a Cube object to copy state from
+            cube:  a Cube object to copy state from
                    if not provided, the cube is initialized
                    in the solved state
         '''
@@ -114,30 +135,40 @@ class Cube():
         else:
             self.arr = copy.copy(solved_cube_arr)
 
-    def turn(self, face, dir, undo=False):
+    def turn(self, face, direction, undo=False):
         '''
             performs any single outer layer turn in any direction
 
             face: one of the Face enums
-            dir: one of the Dir enums
+            direction: one of the Dir enums
             undo: if True, undo the given move. defaults to False
         '''
         # get transformation maps for this face
         corner_trans, edge_trans = FACE_TO_TRANS[face]
 
         # convert Dir enum to index into transformation maps
-        dir = 0 if dir == Dir.CW else 1
+        direction = 0 if direction == Dir.CW else 1
         # swap the direction if asked to undo
         if undo:
-            dir = 1 - dir
+            direction = 1 - direction
 
         # rotate corners
         for i in range(8):
-            self.arr[i] = corner_trans[dir][self.arr[i]] if self.arr[i] in corner_trans[dir] else self.arr[i]
+            self.arr[i] = corner_trans[direction][self.arr[i]] if self.arr[i] in corner_trans[direction] else self.arr[i]
 
         # rotate edges
         for i in range(8, 20):
-            self.arr[i] = edge_trans[dir][self.arr[i]] if self.arr[i] in edge_trans[dir] else self.arr[i]
+            self.arr[i] = edge_trans[direction][self.arr[i]] if self.arr[i] in edge_trans[direction] else self.arr[i]
+
+    def idx_turn(self, idx, undo=False):
+        '''
+            performs any single outer layer turn in any direction
+
+            idx: an index referring to a specific turn
+            undo: if True, undo the given move. defaults to False
+        '''
+        face, direction = idx_to_move[idx]
+        self.turn(face, direction, undo)
 
     def to_tensor(self):
         '''
@@ -149,7 +180,7 @@ class Cube():
             tensor = torch.cat((tensor, line), 1)
         return tensor
 
-    def get_arr(self):
+    def get_array(self):
         '''
             returns 1x20 array representation of the Rubik's Cube
         '''
@@ -174,3 +205,10 @@ class Cube():
             resets the cube to the solved state
         '''
         self.arr = copy.copy(solved_cube_arr)
+
+    def __hash__(self):
+        '''
+            generates a unique hash of the cube state which
+            corresponds to a tuple of the state array
+        '''
+        return hash(tuple(self.arr))
