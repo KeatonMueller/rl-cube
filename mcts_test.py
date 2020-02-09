@@ -1,14 +1,32 @@
 import torch
 import random, math
-from math import sqrt
+from math import sqrt, log
 from time import time
 
 import cube as C
 
 # exploration hyperparameter
-HYP_C = 1.1
+HYP_C = 1.4
 # virtual loss hyperparameter
-HYP_V = 0.1
+HYP_V = 1000
+'''
+    a map from move index to the string representation
+    of the move, for debugging purposes
+'''
+idx_to_str = {
+    0: 'R',
+    1: 'R\'',
+    2: 'L',
+    3: 'L\'',
+    4: 'U',
+    5: 'U\'',
+    6: 'D',
+    7: 'D\'',
+    8: 'F',
+    9: 'F\'',
+    10: 'B',
+    11: 'B\'',
+}
 
 class Tree:
     def __init__(self, cube, net):
@@ -74,10 +92,10 @@ def mcts_test(net, length, time_limit):
         'hits': 0,
         'total': 0
     }
-    mcts_test_helper(net, C.Cube(), length, length, stats, time_limit)
+    mcts_test_helper(net, C.Cube(), length, length, stats, time_limit, '')
     print('mcts test: solved', stats['hits'], 'out of', stats['total'], '(' + str(round(stats['hits'] / stats['total'] * 100, 2)) + '%)', str(length) + '-move scrambles')
 
-def mcts_test_helper(net, cube, curr_len, orig_len, stats, time_limit):
+def mcts_test_helper(net, cube, curr_len, orig_len, stats, time_limit, curr_scramble):
     '''
         performs all 12 possible moves and either attempts a solve
         afterwards or recursively calls itself to further scramble the cube
@@ -89,20 +107,19 @@ def mcts_test_helper(net, cube, curr_len, orig_len, stats, time_limit):
         stats: a dict tracking solved cubes and total attempts
         time_limit: the time limit for each mcts attempt at solving a cube
     '''
-    for face_ in C.Faces:
-        for dir_ in C.Dirs:
-            # make a turn
-            cube.turn(face_, dir_)
-            if(curr_len == 1):
-                # if no more turns needed, attempt a solve
-                attempt_solve(net, C.Cube(cube), time_limit, stats)
-            else:
-                # otherwise recurse and keep scrambling
-                mcts_test_helper(net, cube, curr_len-1, orig_len, stats, time_limit)
-            # undo the turn
-            cube.turn(face_, dir_, True)
+    for idx in range(12):
+        # make a turn
+        cube.idx_turn(idx)
+        if(curr_len == 1):
+            # if no more turns needed, attempt a solve
+            attempt_solve(net, C.Cube(cube), time_limit, stats, curr_scramble + ' ' + idx_to_str[idx])
+        else:
+            # otherwise recurse and keep scrambling
+            mcts_test_helper(net, cube, curr_len-1, orig_len, stats, time_limit, curr_scramble + ' ' + idx_to_str[idx])
+        # undo the turn
+        cube.idx_turn(idx, True)
 
-def attempt_solve(net, cube, time_limit, stats):
+def attempt_solve(net, cube, time_limit, stats, scramble):
     '''
         attempts to solve the cube within a set number of
         tree traversals using MCTS
@@ -119,13 +136,15 @@ def attempt_solve(net, cube, time_limit, stats):
         leaf = traverse(tree.root)
         if(leaf.cube.is_solved()):
             solved = True
-            print('solution length:', get_length(leaf, 0))
+            # print('solution length:', get_length(leaf, 0))
+            print('solved', scramble, '=>', get_solution(leaf, ''), tree.root.N)
             break
         else:
             expand(leaf)
             update_statistics(leaf, get_value(leaf))
     else:
-        print('failed solve')
+        print('failed solve', scramble, tree.root.N, tree.root.P)
+        import pdb; pdb.set_trace()
 
     if(solved):
         stats['hits'] += 1
@@ -142,6 +161,20 @@ def get_length(node, n):
     if(len(node.parents) == 0):
         return n
     return get_length(node.chosen_parent, n+1)
+
+def get_solution(node, cur_sol):
+    '''
+        temp function for testing
+        returns the solution found by mcts
+
+        node: the node corresponding to the solved cube state
+        cur_sol: the string representation of the solution
+    '''
+    if(len(node.parents) == 0):
+        return cur_sol
+    parent = node.chosen_parent
+    cur_sol = idx_to_str[parent.chosen_action] + ' ' + cur_sol
+    return get_solution(parent, cur_sol)
 
 def traverse(node):
     '''
@@ -165,22 +198,35 @@ def tree_policy(node):
 
         node: the node from which to pick the next step in the traversal
     '''
-    # perform argmax on the actions
+    # find best action
     best_a = None
     best_val = float('-inf')
+
+    # summation term
+    sum = 0
+    for a_i in range(12):
+        sum += node.N[a_i]
+
+    # perform argmax on the actions
     for a in range(12):
-        # summation term
-        sum = 0
-        for a_i in range(12):
-            sum += node.N[a_i]
+        # this is the paper's tree policy
         # U term
         U = HYP_C * node.P[a].item() * sqrt(sum) / (1 + node.N[a])
         # Q term
         Q = node.W[a] - node.L[a]
+
+        # this is slightly modified UCT
+        # exploitation term
+        exploit = node.W[a] + node.P[a].item()
+        # exploration term
+        explore = (2 * math.log(sum + 1) / (node.N[a] + 1)) ** 0.5
+
+        val = exploit + explore # or U + Q for paper's tree policy
+
         # check if new best
-        if(U + Q > best_val):
+        if(val > best_val):
             best_a = a
-            best_val = U + Q
+            best_val = val
     # increase virtual loss to discourage identical traversal
     node.L[best_a] += HYP_V
     # remember chosen action

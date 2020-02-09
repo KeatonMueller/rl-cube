@@ -9,10 +9,15 @@ Results using naive tests
 		- NUM_SCRAMBLES = 50, SCRAMBLE_LENGTH = 2
 
 Results using mcts tests
-	- with SGD optimizer and lr = 0.1, solved 122 out of 144 2-move scrambles
-		- periods = 5, epochs = 5, batch size = 1
+	- with SGD optimizer and lr = 0.1, solved 144 out of 144 2-move scrambles
+		- periods = 110, epochs = 50, batch size = 1
 		- time_limit = 5
-		- NUM_SCRAMBLES = 50, SCRAMBLE_LENGTH = 1 ** only trained it on one move scrambles!
+		- NUM_SCRAMBLES = 100, SCRAMBLE_LENGTH = 2
+
+	- with SGD optimizer and lr = 0.1, solved 1717 out of 1728 3-move scrambles
+		- periods = 110, epochs = 50, batch size = 1
+		- time_limit = 5
+		- NUM_SCRAMBLES = 100, SCRAMBLE_LENGTH = 2
 
 Time to train
 	- periods = 10, epochs = 50, batch size = 1
@@ -23,9 +28,17 @@ Time to train
 	- NUM_SCRAMBLES = 50, SCRAMBLE_LENGTH = 2
 		- about 47:00 to train
 
+	- periods = 30, epochs = 50, batch size = 1
+	- NUM_SCRAMBLES = 50, SCRAMBLE_LENGTH = 2
+		- about 71:00 to train
+
 	- so to target about 9 hours of training, roughly
 		- periods = 230, epochs = 50, batch size = 1
 		- NUM_SCRAMBLES = 50, SCRAMBLE_LENGTH = 2
+
+	- periods = 110, epochs = 50, batch size = 1
+	- NUM_SCRAMBLES = 100, SCRAMBLE_LENGTH = 2
+		- about 552:45 to train
 To-Do:
 	- add batching
 	- add cuda utilization
