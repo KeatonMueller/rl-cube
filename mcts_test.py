@@ -9,6 +9,10 @@ import cube as C
 HYP_C = 1.4
 # virtual loss hyperparameter
 HYP_V = 1000
+
+# exploration hyperparameter for UCT
+HYP_UCT = 2
+
 '''
     a map from move index to the string representation
     of the move, for debugging purposes
@@ -144,7 +148,6 @@ def attempt_solve(net, cube, time_limit, stats, scramble):
             update_statistics(leaf, get_value(leaf))
     else:
         print('failed solve', scramble, tree.root.N, tree.root.P)
-        import pdb; pdb.set_trace()
 
     if(solved):
         stats['hits'] += 1
@@ -219,7 +222,7 @@ def tree_policy(node):
         # exploitation term
         exploit = node.W[a] + node.P[a].item()
         # exploration term
-        explore = (2 * math.log(sum + 1) / (node.N[a] + 1)) ** 0.5
+        explore = (HYP_UCT * math.log(sum + 1) / (node.N[a] + 1)) ** 0.5
 
         val = exploit + explore # or U + Q for paper's tree policy
 
