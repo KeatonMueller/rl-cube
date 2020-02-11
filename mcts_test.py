@@ -125,8 +125,7 @@ def mcts_test_helper(net, cube, curr_len, orig_len, stats, time_limit, curr_scra
 
 def attempt_solve(net, cube, time_limit, stats, scramble):
     '''
-        attempts to solve the cube within a set number of
-        tree traversals using MCTS
+        attempts to solve the cube within a time limit using MCTS
 
         cube: the Cube object trying to be solved
         net: a CubeNet used to aid the tree traversal
@@ -134,43 +133,27 @@ def attempt_solve(net, cube, time_limit, stats, scramble):
         stats: a map keeping track of number of successful solves and solve attempts
     '''
     tree = Tree(cube, net)
-    solved = False
     start_time = time()
     while(time() - start_time < time_limit):
         leaf = traverse(tree.root)
         if(leaf.cube.is_solved()):
-            solved = True
-            # print('solution length:', get_length(leaf, 0))
-            print('solved', scramble, '=>', get_solution(leaf, ''), tree.root.N)
+            stats['hits'] += 1
+            print('solved', scramble, '=>', get_solution(leaf, ''), '\t', tree.root.N)
             break
         else:
             expand(leaf)
             update_statistics(leaf, get_value(leaf))
     else:
-        print('failed solve', scramble, tree.root.N, tree.root.P)
+        print('failed solve', scramble, '\t', tree.root.N)
 
-    if(solved):
-        stats['hits'] += 1
     stats['total'] += 1
-
-def get_length(node, n):
-    '''
-        temp function for testing
-        returns the length of the solution found by mcts
-
-        node: the node corresponding to the solved cube state
-        n: the length calculated so far
-    '''
-    if(len(node.parents) == 0):
-        return n
-    return get_length(node.chosen_parent, n+1)
 
 def get_solution(node, cur_sol):
     '''
         temp function for testing
         returns the solution found by mcts
 
-        node: the node corresponding to the solved cube state
+        node: the node corresponding to the current cube state
         cur_sol: the string representation of the solution
     '''
     if(len(node.parents) == 0):
@@ -269,7 +252,7 @@ def get_value(node):
     node.net.eval()
     with torch.no_grad():
         out_v, out_p = node.net(node.cube.to_tensor())
-    return out_v
+    return out_v.item()
 
 def update_statistics(node, value):
     '''
