@@ -11,7 +11,7 @@ HYP_C = 1.4
 HYP_V = 1000
 
 # exploration hyperparameter for UCT
-HYP_UCT = 2
+HYP_UCT = 6
 
 '''
     a map from move index to the string representation
@@ -132,13 +132,14 @@ def attempt_solve(net, cube, time_limit, stats, scramble):
         n: the number of traversals allowed in the attempt
         stats: a map keeping track of number of successful solves and solve attempts
     '''
+    stats = stats if stats else {'hits': 0, 'total': 0}
     tree = Tree(cube, net)
     start_time = time()
     while(time() - start_time < time_limit):
         leaf = traverse(tree.root)
         if(leaf.cube.is_solved()):
             stats['hits'] += 1
-            print('solved', scramble, '=>', get_solution(leaf, ''), '\t', tree.root.N)
+            print('solved', scramble, '=>', get_solution(leaf, ''), '\t', tree.root.N, str(round(time() - start_time, 2)))
             break
         else:
             expand(leaf)
