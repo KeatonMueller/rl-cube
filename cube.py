@@ -28,7 +28,7 @@ class Dir(Enum):
     arrays containing the Face and Dir enums
 '''
 Faces = [ Face.RIGHT, Face.LEFT, Face.UP, Face.DOWN, Face.FRONT, Face.BACK ]
-Dirs = [ Dir.CW, Dir. CCW ]
+Dirs = [ Dir.CW, Dir.CCW ]
 
 '''
     a map from a Face enum to the corresponding transformation maps needed to
