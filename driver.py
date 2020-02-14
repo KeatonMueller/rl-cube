@@ -76,8 +76,9 @@ if __name__ == "__main__":
     # learning rate of optimizer
     LR = args.learning_rate
 
+    device = torch.device('cuda:0') if torch.cuda.is_available() else torch.device('cpu')
     # initialize CubeNet and optimizer
-    net = CubeNet()
+    net = CubeNet().to(device)
     optimizer = optim.SGD(net.parameters(), lr=LR)
 
     # load model
@@ -105,11 +106,9 @@ if __name__ == "__main__":
             for epoch in range(EPOCHS):
                 print('\t\tepoch:', epoch, end='\t')
                 for x, y in zip(X, Y):
-                '''
-                for x, y in data_generator:
-                '''
-
+                # for x, y in data_generator:
                     # get expected output
+                    x, distance = x
                     y_v, y_p = y
                     '''
                     # import pdb; pdb.set_trace()
@@ -127,7 +126,7 @@ if __name__ == "__main__":
                     loss_v = F.mse_loss(out_v, y_v)
                     loss_p = F.cross_entropy(out_p, y_p)
                     loss = loss_v + loss_p
-
+                    loss = loss * (1 / distance)
                     # update weights
                     loss.backward()
                     optimizer.step()

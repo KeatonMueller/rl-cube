@@ -94,6 +94,7 @@ def generate_training_data(num, length, net):
         length: length of scramble per cube
         net: a CubeNet used to label the generated examples
     '''
+    device = torch.device('cuda:0') if torch.cuda.is_available() else torch.device('cpu')
     # enter eval mode (network shouldn't be training during this)
     net.eval()
     # lists for generated input and labels
@@ -136,11 +137,11 @@ def generate_training_data(num, length, net):
                 import pdb; pdb.set_trace()
 
             # get labels for inputs
-            y_v = torch.tensor([[best_val]])
-            y_p = torch.tensor([best_i])
+            y_v = torch.tensor([[best_val]]).to(device)
+            y_p = torch.tensor([best_i]).to(device)
 
             # store results
-            X.append(cube.to_tensor())
+            X.append((cube.to_tensor().to(device), j + 1))
             Y.append((y_v, y_p))
 
     return (X, Y)
