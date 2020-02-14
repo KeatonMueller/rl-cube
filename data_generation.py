@@ -94,6 +94,7 @@ def generate_training_data(num, length, net):
         length: length of scramble per cube
         net: a CubeNet used to label the generated examples
     '''
+    # device for CPU or GPU calculations
     device = torch.device('cuda:0') if torch.cuda.is_available() else torch.device('cpu')
     # enter eval mode (network shouldn't be training during this)
     net.eval()

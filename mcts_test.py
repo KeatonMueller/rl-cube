@@ -32,6 +32,9 @@ idx_to_str = {
     11: 'B\'',
 }
 
+# device for CPU or GPU calculations
+device = torch.device('cuda:0') if torch.cuda.is_available() else torch.device('cpu')
+
 class Tree:
     def __init__(self, cube, net):
         '''
@@ -73,7 +76,7 @@ class Node:
 
         net.eval()
         with torch.no_grad():
-            out_v, out_p = net(cube.to_tensor())
+            out_v, out_p = net(cube.to_tensor().to(device))
         # prior probability of action a from this state
         self.P = out_p[0]
 
@@ -257,7 +260,7 @@ def get_value(node):
     '''
     node.net.eval()
     with torch.no_grad():
-        out_v, out_p = node.net(node.cube.to_tensor())
+        out_v, out_p = node.net(node.cube.to_tensor().to(device))
     return out_v.item()
 
 def update_statistics(node, value):

@@ -76,6 +76,7 @@ if __name__ == "__main__":
     # learning rate of optimizer
     LR = args.learning_rate
 
+    # device for CPU or GPU calculations
     device = torch.device('cuda:0') if torch.cuda.is_available() else torch.device('cpu')
     # initialize CubeNet and optimizer
     net = CubeNet().to(device)
