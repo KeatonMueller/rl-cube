@@ -119,7 +119,7 @@ def generate_training_data(num, length, net):
                     cube.turn(face, dir)
                     # evaluate resulting position
                     with torch.no_grad():
-                        v, p = net(cube.to_tensor())
+                        v, p = net(cube.to_tensor().to(device))
                     # append value and reward for being in this position
                     v_x.append(cube.reward() + v.item())
                     # undo turn
