@@ -139,7 +139,7 @@ def attempt_solve(net, cube, time_limit, stats, scramble):
         n: the number of traversals allowed in the attempt
         stats: a map keeping track of number of successful solves and solve attempts
     '''
-    stats = stats if stats else {'hits': 0, 'total': 0}
+    stats = stats if stats else { 'hits': 0, 'total': 0, 'time': 0 }
     tree = Tree(cube, net)
     start_time = time()
     while(time() - start_time < time_limit):
