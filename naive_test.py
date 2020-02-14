@@ -21,6 +21,9 @@ idx_to_move = {
     11: (C.Face.BACK, C.Dir.CCW),
 }
 
+# device for CPU or GPU calculations
+device = torch.device('cuda:0') if torch.cuda.is_available() else torch.device('cpu')
+
 def naive_test(net, length):
     '''
         naively tests (that is, uses the policy network alone without MCTS)
@@ -73,7 +76,7 @@ def attempt_solve(net, cube, length, stats):
     with torch.no_grad():
         for i in range(length):
             # run the cube through the network and do the turn the policy says to
-            out_v, out_p = net(cube.to_tensor())
+            out_v, out_p = net(cube.to_tensor().to(device))
             f, d = idx_to_move[torch.argmax(out_p).item()]
             cube.turn(f, d)
 
