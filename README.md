@@ -25,6 +25,7 @@ To run it, clone this repo and run `driver.py`. Run
 `python3 driver.py -h` to see a list of modes it can be run in.
 
 To load a pre-trained model and give it scrambles to solve, run something like
+
 `python3 driver.py --load model_300_50_100_4 --solve`
 
 Note that as of this time, the model has only been trained on scrambles
