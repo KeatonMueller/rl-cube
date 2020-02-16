@@ -100,13 +100,19 @@ def mcts_test(net, length, time_limit):
         'total': 0,
         'time': 0
     }
-    mcts_test_helper(net, C.Cube(), length, length, stats, time_limit, '')
+    # only run exhaustive test if scramble length < 5
+    if(length < 5):
+        mcts_test_helper_all(net, C.Cube(), length, length, stats, time_limit, '')
+    # otherwise randomly scramble the cube `length` times
+    else:
+        mcts_test_helper_random(net, C.Cube(), length, stats, time_limit)
+
     print('mcts test: solved', stats['hits'], 'out of', stats['total'], \
             '(' + str(round(stats['hits'] / stats['total'] * 100, 2)) + '%)',\
             str(length) + '-move scrambles with an average solve time of', \
             str(round(stats['time'] / stats['hits'], 2)))
 
-def mcts_test_helper(net, cube, curr_len, orig_len, stats, time_limit, curr_scramble):
+def mcts_test_helper_all(net, cube, curr_len, orig_len, stats, time_limit, curr_scramble):
     '''
         performs all 12 possible moves and either attempts a solve
         afterwards or recursively calls itself to further scramble the cube
@@ -126,9 +132,32 @@ def mcts_test_helper(net, cube, curr_len, orig_len, stats, time_limit, curr_scra
             attempt_solve(net, C.Cube(cube), time_limit, stats, curr_scramble + ' ' + idx_to_str[idx])
         else:
             # otherwise recurse and keep scrambling
-            mcts_test_helper(net, cube, curr_len-1, orig_len, stats, time_limit, curr_scramble + ' ' + idx_to_str[idx])
+            mcts_test_helper_all(net, cube, curr_len-1, orig_len, stats, time_limit, curr_scramble + ' ' + idx_to_str[idx])
         # undo the turn
         cube.idx_turn(idx, True)
+
+def mcts_test_helper_random(net, cube, length, stats, time_limit):
+    '''
+        randomly scrambles 1000 cubes `length` times and then attempts
+        to solve them
+
+        net: a CubeNet network
+        cube: a Cube object currently being scrambled
+        length: the number of turns for each scramble
+        stats: a dict tracking solved cubes and total attempts
+        time_limit: the time limit for each mcts attempt at solving a cube
+    '''
+    # try to solve 1000 randomly scrambled cubes
+    for i in range(1000):
+        cube.reset()
+        curr_scramble = ''
+        # make `length` random turns
+        for j in range(length):
+            idx = int(random.random() * 12)
+            cube.idx_turn(idx)
+            curr_scramble = curr_scramble + ' ' + idx_to_str[idx]
+        # attempt a solve
+        attempt_solve(net, cube, time_limit, stats, curr_scramble)
 
 def attempt_solve(net, cube, time_limit, stats, scramble):
     '''
