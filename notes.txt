@@ -29,6 +29,13 @@ Results using mcts tests
 		- time_limit = 5
 		- NUM_SCRAMBLES = 100, SCRAMBLE_LENGTH = 4
 
+	- model_100_50_100_3_4 - 20427 out of 20736 (98.51%) of 4-move scrambles
+		- was model_80_50_100_3 trained with 20 periods of 4-move scrambles
+
+	- model_100_50_100_4_lw - 20710 out of 20736 (99.87%) of 4-move scrambles (solved 100% with avg 0.24)
+	- model_130_50_100_4_lw - 20727 out of 20736 (99.96%) of 4-move scrambles
+	- model_300_50_100_4_lw - 20736 out of 20736 (100.0%) of 4-move scrambles, avg 0.16 seconds
+
 Time to train
 	- periods = 10, epochs = 50, batch size = 1
 	- NUM_SCRAMBLES = 50, SCRAMBLE_LENGTH = 2
@@ -61,9 +68,13 @@ Time to train
 	- periods = 10, epochs = 50, batch size = 1
 	- NUM_SCRAMBLES = 100, SCRAMBLE_LENGTH = 4
 		- about 103:00 to train
+
+Time to train with CUDA
+	- periods = 10, epochs = 50, batch size = 1
+	- NUM_SCRAMBLES = 100, SCRAMBLE_LENGTH = 4
+		- about 30:00 to train
 To-Do:
 	- add batching
-	- add cuda utilization
 	- add BFS following MCTS to shorten solution lengths
 
 tmux running on giraffe
