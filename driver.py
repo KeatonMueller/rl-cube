@@ -85,7 +85,7 @@ if __name__ == "__main__":
     # load model
     if(args.load):
         # load model checkpoint
-        checkpoint = torch.load(args.load)
+        checkpoint = torch.load(args.load, map_location=device)
         net.load_state_dict(checkpoint['model_state_dict'])
         optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
         net.eval()
