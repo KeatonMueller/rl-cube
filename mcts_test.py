@@ -177,11 +177,11 @@ def attempt_solve(net, cube, time_limit, stats, scramble):
     while(time() - start_time < time_limit):
         leaf = traverse(tree.root)
         if(leaf.cube.is_solved()):
-            time = time() - start_time
+            solve_time = time() - start_time
             stats['hits'] += 1
-            stats['time'] += time
-            stats['max'] = time if time > stats['max'] else stats['max']
-            print('solved', scramble, '=>', get_solution(leaf, ''), '\t', tree.root.N, str(round(time, 2)))
+            stats['time'] += solve_time
+            stats['max'] = solve_time if solve_time > stats['max'] else stats['max']
+            print('solved', scramble, '=>', get_solution(leaf, ''), '\t', tree.root.N, str(round(solve_time, 2)))
             break
         else:
             expand(leaf)
