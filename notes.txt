@@ -35,6 +35,10 @@ Results using mcts tests
 	- model_100_50_100_4_lw - 20710 out of 20736 (99.87%) of 4-move scrambles (solved 100% with avg 0.24)
 	- model_130_50_100_4_lw - 20727 out of 20736 (99.96%) of 4-move scrambles
 	- model_300_50_100_4_lw - 20736 out of 20736 (100.0%) of 4-move scrambles, avg 0.16 seconds
+	- model_100_50_100_30
+		- 20736 out of 20736 (100.0%) of 4-move scrambles, avg 0.07 seconds
+		- 988 out of 1000 5-move scrambles
+
 
 Time to train
 	- periods = 10, epochs = 50, batch size = 1

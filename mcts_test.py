@@ -153,7 +153,7 @@ def mcts_test_helper_random(net, cube, length, stats, time_limit):
         curr_scramble = ''
         # make `length` random turns
         for j in range(length):
-            idx = int(random.random() * 12)
+            idx = random.randint(0, 11)
             cube.idx_turn(idx)
             curr_scramble = curr_scramble + ' ' + idx_to_str[idx]
         # attempt a solve

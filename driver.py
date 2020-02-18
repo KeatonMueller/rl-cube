@@ -57,6 +57,7 @@ if __name__ == "__main__":
     parser.add_argument('-b', '--batch', type=int, default=64, help='batch size during training')
     parser.add_argument('-r', '--learning_rate', type=float, default=0.01, help='learning rate of optimizer')
     parser.add_argument('-t', '--test', type=str, nargs='+', default='[none]', help='what kinds of tests to run (like `naive` or `mcts`)')
+    parser.add_argument('--time', type=int, default=5, help='time limit (in seconds) for each mcts solve attempt')
     parser.add_argument('--load', metavar='PATH', type=str, help='load model parameters from a file')
     parser.add_argument('--save', metavar='PATH', type=str, help='save model parameters to a file')
     parser.add_argument('--train', action='store_true', default=False, help='train the model')
@@ -71,6 +72,8 @@ if __name__ == "__main__":
     NUM_SCRAMBLES = args.number
     # length of each scramble
     SCRAMBLE_LENGTH = args.length
+    # time limit for mcts solve attempt
+    TIME_LIMIT = args.time
     # batch size
     BATCH_SIZE = args.batch
     # learning rate of optimizer
@@ -142,7 +145,7 @@ if __name__ == "__main__":
             naive_test(net, SCRAMBLE_LENGTH)
         if('mcts' in args.test):
             # run a mcts test
-            mcts_test(net, SCRAMBLE_LENGTH, 5)
+            mcts_test(net, SCRAMBLE_LENGTH, TIME_LIMIT)
 
     # interactive solve mode
     if(args.solve):
