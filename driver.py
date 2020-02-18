@@ -155,7 +155,7 @@ if __name__ == "__main__":
             cube.reset()
             for move in scramble:
                 cube.idx_turn(move_to_idx[move])
-            attempt_solve(net, cube, 30, None, ' '.join(scramble))
+            attempt_solve(net, cube, TIME_LIMIT, None, ' '.join(scramble))
             scramble = get_scramble()
 
     # save model

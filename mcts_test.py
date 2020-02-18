@@ -98,7 +98,8 @@ def mcts_test(net, length, time_limit):
     stats = {
         'hits': 0,
         'total': 0,
-        'time': 0
+        'time': 0,
+        'max': -1
     }
     # only run exhaustive test if scramble length < 5
     if(length < 5):
@@ -111,6 +112,8 @@ def mcts_test(net, length, time_limit):
             '(' + str(round(stats['hits'] / stats['total'] * 100, 2)) + '%)',\
             str(length) + '-move scrambles with an average solve time of', \
             str(round(stats['time'] / stats['hits'], 2)))
+    print('\tmax time: ' + stats['max'] + '\n' + \
+          '\tavg time: ' + str(round(stats['time'] / stats['hits'], 2)))
 
 def mcts_test_helper_all(net, cube, curr_len, orig_len, stats, time_limit, curr_scramble):
     '''
@@ -174,9 +177,11 @@ def attempt_solve(net, cube, time_limit, stats, scramble):
     while(time() - start_time < time_limit):
         leaf = traverse(tree.root)
         if(leaf.cube.is_solved()):
+            time = time() - start_time
             stats['hits'] += 1
-            stats['time'] += time() - start_time
-            print('solved', scramble, '=>', get_solution(leaf, ''), '\t', tree.root.N, str(round(time() - start_time, 2)))
+            stats['time'] += time
+            stats['max'] = time if time > stats['max'] else stats['max']
+            print('solved', scramble, '=>', get_solution(leaf, ''), '\t', tree.root.N, str(round(time, 2)))
             break
         else:
             expand(leaf)
