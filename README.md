@@ -21,14 +21,16 @@ Tree Search to go from the scrambled to the solved state.
 ## How to Use It
 You need Python 3 and PyTorch to run this project.
 
-To run it, clone this repo and run `driver.py`. Run
-`python3 driver.py -h` to see a list of modes it can be run in.
+To see a list of options for this project, clone this repo and run
 
-To load a pre-trained model and give it scrambles to solve, run something like
+
+`python3 driver.py -h`
+
+To type in scrambles for a pre-trained model to attempt to solve, run something like
 
 `python3 driver.py --load model_300_50_100_4 --solve`
 
 Note that as of this time, the model has only been trained on scrambles
 of length 4. It can reliably solve all 4-move scrambles in under 5 seconds
-with an average time of 0.16 seconds, but it has not yet been trained to
-handle scrambles of arbitrary length.
+with an average time of 0.16 seconds (time will vary depending on machine it's
+run on), but it has not yet been trained to handle scrambles of arbitrary length.
