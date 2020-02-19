@@ -92,6 +92,7 @@ if __name__ == "__main__":
         net.load_state_dict(checkpoint['model_state_dict'])
         optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
         net.eval()
+        print('loaded', args.load)
 
     # train model
     if(args.train):
@@ -164,3 +165,4 @@ if __name__ == "__main__":
             'model_state_dict': net.state_dict(),
             'optimizer_state_dict': optimizer.state_dict()
         }, args.save)
+        print('saved model as', args.save)

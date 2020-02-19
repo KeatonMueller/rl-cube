@@ -110,8 +110,7 @@ def mcts_test(net, length, time_limit):
 
     print('mcts test: solved', stats['hits'], 'out of', stats['total'], \
             '(' + str(round(stats['hits'] / stats['total'] * 100, 2)) + '%)',\
-            str(length) + '-move scrambles with an average solve time of', \
-            str(round(stats['time'] / stats['hits'], 2)))
+            str(length) + '-move scrambles)
     print('\tmax time: ' + str(round(stats['max'], 2)) + '\n' + \
           '\tavg time: ' + str(round(stats['time'] / stats['hits'], 2)))
 
