@@ -39,8 +39,11 @@ Results using mcts tests
 		- 20736 out of 20736 (100.0%) of 4-move scrambles, avg 0.07 seconds
 		- 1000 out of 1000 5-move scrambles, avg 0.71
 	- model_150_50_100_30
-		- 997 out of 1000 6-move scrambles, avg 1.47, time limit 300
-
+		- 20736 out of 20736 4-move scrambles, avg 0.06, max 2.81
+		- 1000 out of 1000 5-move scrambles, avg 0.29, max 9.04, limit 300
+		- 997 out of 1000 6-move scrambles, avg 1.47, limit 300
+	- model_200
+		- 996 out of 1000 6-move scrambles, avg 1.13, max 90.87, limit 300
 
 Time to train
 	- periods = 10, epochs = 50, batch size = 1

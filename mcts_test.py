@@ -99,7 +99,8 @@ def mcts_test(net, length, time_limit):
         'hits': 0,
         'total': 0,
         'time': 0,
-        'max': -1
+        'max': -1,
+        'fails': []
     }
     # only run exhaustive test if scramble length < 5
     if(length < 5):
@@ -108,11 +109,17 @@ def mcts_test(net, length, time_limit):
     else:
         mcts_test_helper_random(net, C.Cube(), length, stats, time_limit)
 
+    # print out results of test
     print('mcts test: solved', stats['hits'], 'out of', stats['total'], \
             '(' + str(round(stats['hits'] / stats['total'] * 100, 2)) + '%)',\
             str(length) + '-move scrambles')
     print('\tmax time: ' + str(round(stats['max'], 2)) + '\n' + \
           '\tavg time: ' + str(round(stats['time'] / stats['hits'], 2)))
+
+    # record failed solves
+    if(len(stats['fails']) > 0):
+        with open('failed_solves.txt', 'w') as out_file:
+            out_file.write(str(stats['fails']))
 
 def mcts_test_helper_all(net, cube, curr_len, orig_len, stats, time_limit, curr_scramble):
     '''
@@ -170,7 +177,7 @@ def attempt_solve(net, cube, time_limit, stats, scramble):
         n: the number of traversals allowed in the attempt
         stats: a map keeping track of number of successful solves and solve attempts
     '''
-    stats = stats if stats else { 'hits': 0, 'total': 0, 'time': 0, 'max': -1 }
+    stats = stats if stats else { 'hits': 0, 'total': 0, 'time': 0, 'max': -1, 'fails': [] }
     tree = Tree(cube, net)
     start_time = time()
     while(time() - start_time < time_limit):
@@ -187,6 +194,7 @@ def attempt_solve(net, cube, time_limit, stats, scramble):
             update_statistics(leaf, get_value(leaf))
     else:
         print('failed solve', scramble, '\t', tree.root.N)
+        stats['fails'].append(scramble)
 
     stats['total'] += 1
 
