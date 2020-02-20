@@ -31,10 +31,10 @@ class CubeNet(nn.Module):
 
         # value branch
         x_v = F.leaky_relu(self.h2_v(x))
-        out_v = F.tanh(self.out_v(x_v))
+        out_v = torch.tanh(self.out_v(x_v))
 
         # policy branch
-        x_p = torch.leaky_relu(self.h2_p(x))
+        x_p = F.leaky_relu(self.h2_p(x))
         out_p = F.softmax(self.out_p(x_p), dim=1)
 
         return (out_v, out_p)
