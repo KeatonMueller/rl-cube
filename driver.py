@@ -50,7 +50,7 @@ def get_scramble():
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description = 'Run rl-cube')
-    parser.add_argument('-p', '--periods', type=int, default=5, help='number of times to generate new training data')
+    parser.add_argument('-p', '--periods', type=int, default=1, help='number of times to generate new training data')
     parser.add_argument('-e', '--epochs', type=int, default=5, help='number of times to evaluate all of the training data per period')
     parser.add_argument('-n', '--number', type=int, default=50, help='number of cubes to scramble per data generation')
     parser.add_argument('-l', '--length', type=int, default=2, help='length of each scramble')
@@ -96,6 +96,10 @@ if __name__ == "__main__":
 
     # train model
     if(args.train):
+        # report device being trained with
+        print('training with', device)
+        # allow torch to optimize algorithms
+        torch.backends.cudnn.benchmark = True
         # loop over the periods
         for period in range(PERIODS):
             print('period:', period)
