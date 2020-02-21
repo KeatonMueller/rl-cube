@@ -1,6 +1,6 @@
-import torch
 import torch.nn as nn
-import torch.nn.functional as F
+from torch import tanh
+from torch.nn.functional import softmax
 
 class CubeNet(nn.Module):
     def __init__(self):
@@ -26,15 +26,15 @@ class CubeNet(nn.Module):
         nn.init.xavier_uniform_(self.out_p.weight)
 
     def forward(self, x):
-        x = F.leaky_relu(self.input(x))
-        x = F.leaky_relu(self.h1(x))
+        x = tanh(self.input(x))
+        x = tanh(self.h1(x))
 
         # value branch
-        x_v = F.leaky_relu(self.h2_v(x))
-        out_v = torch.tanh(self.out_v(x_v))
+        x_v = tanh(self.h2_v(x))
+        out_v = tanh(self.out_v(x_v))
 
         # policy branch
-        x_p = F.leaky_relu(self.h2_p(x))
-        out_p = F.softmax(self.out_p(x_p), dim=1)
+        x_p = tanh(self.h2_p(x))
+        out_p = softmax(self.out_p(x_p), dim=1)
 
         return (out_v, out_p)
