@@ -179,11 +179,10 @@ class Cube():
         '''
             returns 1x480 (flattened 20x24) torch tensor representation of the Rubik's Cube
         '''
-        tensor = torch.tensor([[]])
+        flattened = []
         for loc in self.arr:
-            line = torch.tensor([[1.0 if i == loc else 0.0 for i in range(24)]])
-            tensor = torch.cat((tensor, line), 1)
-        return tensor.to(device)
+            flattened.extend([1.0 if i == loc else 0.0 for i in range(24)])
+        return torch.tensor([flattened], device=device)
 
     def get_array(self):
         '''

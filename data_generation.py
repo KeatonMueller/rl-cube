@@ -85,6 +85,11 @@ class Dataset(data.Dataset):
 
         return self.cube.to_tensor(), (y_v, y_p)
 
+'''
+    device for CPU or GPU calculations
+'''
+device = torch.device('cuda:0') if torch.cuda.is_available() else torch.device('cpu')
+
 def generate_training_data(num, length, net):
     '''
         generates an array of scrambled cubes of length (num * length)
@@ -132,8 +137,8 @@ def generate_training_data(num, length, net):
                     import pdb; pdb.set_trace()
 
                 # create labels for inputs
-                y_v = torch.tensor([[best_val]])
-                y_p = torch.tensor([best_move])
+                y_v = torch.tensor([[best_val]], device=device)
+                y_p = torch.tensor([best_move], device=device)
 
                 # store results
                 X.append((cube.to_tensor(), j + 1))
