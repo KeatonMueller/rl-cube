@@ -109,6 +109,11 @@ solved_cube_matrix = [
 '''
 solved_cube_arr = [ 0, 1, 2, 3, 20, 21, 22, 23, 0, 1, 2, 3, 20, 21, 22, 23, 9, 11, 17, 19 ]
 
+'''
+    device for CPU or GPU calculations
+'''
+device = torch.device('cuda:0') if torch.cuda.is_available() else torch.device('cpu')
+
 def arr_to_matrix(arr):
     '''
         returns the 20x24 one-hot encoding representation of the given 1x20 representation
@@ -178,7 +183,7 @@ class Cube():
         for loc in self.arr:
             line = torch.tensor([[1.0 if i == loc else 0.0 for i in range(24)]])
             tensor = torch.cat((tensor, line), 1)
-        return tensor
+        return tensor.to(device)
 
     def get_array(self):
         '''

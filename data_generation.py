@@ -94,55 +94,49 @@ def generate_training_data(num, length, net):
         length: length of scramble per cube
         net: a CubeNet used to label the generated examples
     '''
-    # device for CPU or GPU calculations
-    device = torch.device('cuda:0') if torch.cuda.is_available() else torch.device('cpu')
     # enter eval mode (network shouldn't be training during this)
     net.eval()
     # lists for generated input and labels
     X = []
     Y = []
     cube = C.Cube()
-    # for `num` number of cubes
-    for i in range(num):
-        cube.reset()
-        # for `length` number of turns
-        for j in range(length):
-            # perform a random turn
-            cube.turn(random.choice(C.Faces), random.choice(C.Dirs))
+    with torch.no_grad():
+        # for `num` number of cubes
+        for i in range(num):
+            cube.reset()
+            # for `length` number of turns
+            for j in range(length):
+                # perform a random turn
+                cube.turn(random.choice(C.Faces), random.choice(C.Dirs))
 
-            # list to store values of 12 children
-            v_x = []
+                # list to store values of 12 children
+                v_x = []
 
-            # evaluate 12 children
-            for face in C.Faces:
-                for dir in C.Dirs:
+                # evaluate 12 children
+                best_val, best_move = (float('-inf'), -1)
+                for move in range(12):
                     # perform one turn
-                    cube.turn(face, dir)
+                    cube.idx_turn(move)
                     # evaluate resulting position
-                    with torch.no_grad():
-                        v, p = net(cube.to_tensor().to(device))
-                    # append value and reward for being in this position
-                    v_x.append(cube.reward() + v.item())
+                    v, p = net(cube.to_tensor())
+                    value = v.item() + cube.reward()
+                    # update best
+                    if(value > best_val):
+                        best_val = value
+                        best_move = move
                     # undo turn
-                    cube.turn(face, dir, True)
+                    cube.idx_turn(move, True)
 
-            # perform max and argmax
-            best_val, best_i = (float('-inf'), -1)
-            for i in range(len(v_x)):
-                if(v_x[i] > best_val):
-                    best_val = v_x[i]
-                    best_i = i
+                # this happens when the weights become nan
+                if best_move == -1:
+                    import pdb; pdb.set_trace()
 
-            # this happens when the weights become nan
-            if best_i == -1:
-                import pdb; pdb.set_trace()
+                # create labels for inputs
+                y_v = torch.tensor([[best_val]])
+                y_p = torch.tensor([best_move])
 
-            # get labels for inputs
-            y_v = torch.tensor([[best_val]]).to(device)
-            y_p = torch.tensor([best_i]).to(device)
-
-            # store results
-            X.append((cube.to_tensor().to(device), j + 1))
-            Y.append((y_v, y_p))
+                # store results
+                X.append((cube.to_tensor(), j + 1))
+                Y.append((y_v, y_p))
 
     return (X, Y)
