@@ -35,6 +35,7 @@ Results using mcts tests
 	- model_100_50_100_4_lw - 20710 out of 20736 (99.87%) of 4-move scrambles (solved 100% with avg 0.24)
 	- model_130_50_100_4_lw - 20727 out of 20736 (99.96%) of 4-move scrambles
 	- model_300_50_100_4_lw - 20736 out of 20736 (100.0%) of 4-move scrambles, avg 0.16 seconds
+
 	- model_100_50_100_30
 		- 20736 out of 20736 (100.0%) of 4-move scrambles, avg 0.07 seconds
 		- 1000 out of 1000 5-move scrambles, avg 0.71
@@ -44,6 +45,15 @@ Results using mcts tests
 		- 997 out of 1000 6-move scrambles, avg 1.47, limit 300
 	- model_200
 		- 996 out of 1000 6-move scrambles, avg 1.13, max 90.87, limit 300
+
+	- v1 - original
+		- 3-move: 0.04 avg 0.22 max
+	- v2 - tanh everything - giraffe
+		- legit failed solves on 3-move with 5s limit
+	- v3 - tanh only final layer - turtle
+		- 3-move: 0.06 avg 0.37 max
+	- v4 - leaky_relu everything - tiger
+		- 3-move: 0.04 avg 0.21 max
 
 Time to train
 	- periods = 10, epochs = 50, batch size = 1

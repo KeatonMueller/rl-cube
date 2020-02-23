@@ -26,12 +26,12 @@ class CubeNet(nn.Module):
         nn.init.xavier_uniform_(self.out_p.weight)
 
     def forward(self, x):
-        x = tanh(self.input(x))
-        x = tanh(self.h1(x))
+        x = leaky_relu(self.input(x))
+        x = leaky_relu(self.h1(x))
 
         # value branch
-        x_v = tanh(self.h2_v(x))
-        out_v = tanh(self.out_v(x_v))
+        x_v = leaky_relu(self.h2_v(x))
+        out_v = leaky_relu(self.out_v(x_v))
 
         # policy branch
         x_p = tanh(self.h2_p(x))
