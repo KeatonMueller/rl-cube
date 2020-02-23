@@ -1,6 +1,6 @@
 import torch.nn as nn
 from torch import tanh
-from torch.nn.functional import softmax
+from torch.nn.functional import softmax, leaky_relu
 
 class CubeNet(nn.Module):
     def __init__(self):
