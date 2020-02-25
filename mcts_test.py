@@ -158,6 +158,7 @@ def mcts_test_helper_random(net, cube, length, stats, time_limit):
     '''
     # try to solve 1000 randomly scrambled cubes
     for i in range(1000):
+        print('{0:>5}'.format(str(i)+':'), end=' ')
         cube.reset()
         curr_scramble = ''
         # make `length` random turns
