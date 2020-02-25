@@ -189,7 +189,7 @@ def attempt_solve(net, cube, time_limit, stats, scramble):
             stats['time'] += solve_time
             stats['max'] = solve_time if solve_time > stats['max'] else stats['max']
             length = len(scramble.split(' ')) * 3 - 1
-            print(('solved {0:<'+str(length)+'}').format(scramble), '=>  ', ('{0:<'+str(length)+'}').format(get_solution(leaf, '')), str(round(solve_time, 2)), tree.root.N)
+            print(('solved {0:<'+str(length)+'}').format(scramble), '=>  ', ('{0:<'+str(length)+'}').format(get_solution(leaf, '')), str(round(solve_time, 2)), '\t', tree.root.N)
             break
         else:
             expand(leaf)
