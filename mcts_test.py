@@ -156,15 +156,20 @@ def mcts_test_helper_random(net, cube, length, stats, time_limit):
         stats: a dict tracking solved cubes and total attempts
         time_limit: the time limit for each mcts attempt at solving a cube
     '''
+    idx_to_inv = { 0: 1, 1: 0, 2: 3, 3: 2, 4: 5, 5: 4, 6: 7, 7: 6, 8: 9, 9: 8, 10: 11, 11: 10 }
     # try to solve 1000 randomly scrambled cubes
     for i in range(1000):
         print('{0:>5}'.format(str(i)+':'), end=' ')
         cube.reset()
         curr_scramble = ''
-        # make `length` random turns
+        # make `length` random turns, preventing moves that undo the previous
+        prev_idx = -1
         for j in range(length):
             idx = random.randint(0, 11)
+            while(idx_to_inv[idx] == prev_idx):
+                idx = random.randint(0, 11)
             cube.idx_turn(idx)
+            prev_idx = idx
             curr_scramble = curr_scramble + ' ' + idx_to_str[idx]
         # attempt a solve
         attempt_solve(net, cube, time_limit, stats, curr_scramble)
