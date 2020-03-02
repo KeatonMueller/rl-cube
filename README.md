@@ -5,9 +5,9 @@ I'm working on this project as a part of CPSC 674: Advanced Computational Intell
 
 Many of the ideas I will draw upon and try to recreate come from these two papers:
 
-	https://arxiv.org/abs/1805.07470
+- https://arxiv.org/abs/1805.07470
 
-	https://www.nature.com/articles/s42256-019-0070-z#Sec11
+- https://www.nature.com/articles/s42256-019-0070-z#Sec11
 
 ## How it Works
 This project uses a technique introduced by Stephen McAleer called Autodidactic Iteration.
