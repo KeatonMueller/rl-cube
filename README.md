@@ -22,18 +22,19 @@ Once the policy and value network is trained, it is used to guide a Monte-Carlo
 Tree Search to go from the scrambled to the solved state.
 
 ## How to Use It
-You need Python 3 and PyTorch to run this project.
+You need Python 3 and PyTorch to run this project. It is also recommend you use a CUDA enabled machine.
 
 To see a list of options for this project, clone this repo and run
 
 
-`python3 driver.py -h`
+`python3 driver.py --help`
 
 To type in scrambles for a pre-trained model to attempt to solve, run something like
 
 `python3 driver.py --load model_500 --solve`
 
-Note that as of this time, the model has only been trained on scrambles
-of length 4. It can reliably solve all 4-move scrambles in under 5 seconds
-with an average time of 0.16 seconds (time will vary depending on machine it's
-run on), but it has not yet been trained to handle scrambles of arbitrary length.
+Note that as of this time, the model is still in the process of being
+trained. The time it takes to find solutions will vary depending on
+machine it's run on, and it is not yet able to handle scrambles of
+arbitrary length. The current model performs reasonably well on scrambles
+up to a length of 6.
