@@ -3,8 +3,11 @@ This is my attempt to use reinforcement learning to solve a Rubik's Cube without
 
 I'm working on this project as a part of CPSC 674: Advanced Computational Intelligence for Games.
 
-Many of the ideas I will draw upon and try to recreate come from this paper: https://arxiv.org/abs/1805.07470
+Many of the ideas I will draw upon and try to recreate come from these two papers:
 
+	https://arxiv.org/abs/1805.07470
+
+	https://www.nature.com/articles/s42256-019-0070-z#Sec11
 
 ## How it Works
 This project uses a technique introduced by Stephen McAleer called Autodidactic Iteration.
@@ -28,7 +31,7 @@ To see a list of options for this project, clone this repo and run
 
 To type in scrambles for a pre-trained model to attempt to solve, run something like
 
-`python3 driver.py --load model_300_50_100_4 --solve`
+`python3 driver.py --load model_500 --solve`
 
 Note that as of this time, the model has only been trained on scrambles
 of length 4. It can reliably solve all 4-move scrambles in under 5 seconds
