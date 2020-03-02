@@ -7,7 +7,7 @@ Many of the ideas I will draw upon and try to recreate come from these two paper
 
 - https://arxiv.org/abs/1805.07470
 
-- https://www.nature.com/articles/s42256-019-0070-z#Sec11
+- https://www.nature.com/articles/s42256-019-0070-z
 
 ## How it Works
 This project uses a technique introduced by Stephen McAleer called Autodidactic Iteration.
