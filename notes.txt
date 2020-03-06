@@ -9,19 +9,12 @@ Results using mcts tests
 	- model_200
 		- 996  6-move scrambles, avg 1.13, max 90.87, limit 300
 	- model_300
-<<<<<<< HEAD
 		- 100% 4-move scrambles, avg 0.05, max 0.57
 		- 1000 5-move scrambles, avg 0.23, max 6.22, limit 300
 		- 997  6-move scrambles, avg 0.99, max 30.02, limit 300
-		
+
 	=== ensured scrambles don't immediately undo themselves ===
 
-=======
-		- 20736 out of 20736 4-move scrambles, avg 0.05, max 0.57
-		- 1000 out of 1000 5-move scrambles, avg 0.23, max 6.22, limit 300
-		- 997 out of 1000 6-move scrambles, avg 0.99, max 30.02, limit 300
-	=== ensured scrambles don't immediately undo themselves ===
->>>>>>> 2dd643f2ace8dd4b3aada861af64a592337eebdb
 	- model_350
 		- 995 6-move scrambles, avg 7.79, max 549.97, limit 600, UCT 16
 	- model_400
@@ -60,11 +53,7 @@ Results using mcts tests
 	- model_700
 		- 1000 6-move scrambles, avg 1.38, max 219.84
 		- 1000 6-move scrambles, avg 1.10, max 21.31
-<<<<<<< HEAD
 
-=======
-		
->>>>>>> 2dd643f2ace8dd4b3aada861af64a592337eebdb
 	- v1 - original
 		- 3-move: 0.04 avg 0.22 max
 	- v2 - tanh everything - giraffe
