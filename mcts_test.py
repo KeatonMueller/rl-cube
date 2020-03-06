@@ -159,7 +159,6 @@ def mcts_test_helper_random(net, cube, length, stats, time_limit):
     idx_to_inv = { 0: 1, 1: 0, 2: 3, 3: 2, 4: 5, 5: 4, 6: 7, 7: 6, 8: 9, 9: 8, 10: 11, 11: 10 }
     # try to solve 1000 randomly scrambled cubes
     for i in range(1000):
-        print('{0:>5}'.format(str(i)+':'), end=' ')
         cube.reset()
         curr_scramble = ''
         # make `length` random turns, preventing moves that undo the previous
@@ -172,9 +171,9 @@ def mcts_test_helper_random(net, cube, length, stats, time_limit):
             prev_idx = idx
             curr_scramble = curr_scramble + ' ' + idx_to_str[idx]
         # attempt a solve
-        attempt_solve(net, cube, time_limit, stats, curr_scramble)
+        attempt_solve(net, cube, time_limit, stats, curr_scramble, i)
 
-def attempt_solve(net, cube, time_limit, stats, scramble):
+def attempt_solve(net, cube, time_limit, stats, scramble, solve_num=-1):
     '''
         attempts to solve the cube within a time limit using MCTS
 
@@ -186,6 +185,7 @@ def attempt_solve(net, cube, time_limit, stats, scramble):
     stats = stats if stats else { 'hits': 0, 'total': 0, 'time': 0, 'max': -1, 'fails': [] }
     tree = Tree(cube, net)
     start_time = time()
+    print('attempting', scramble, '...', end='\r')
     while(time() - start_time < time_limit):
         leaf = traverse(tree.root)
         if(leaf.cube.is_solved()):
@@ -194,6 +194,8 @@ def attempt_solve(net, cube, time_limit, stats, scramble):
             stats['time'] += solve_time
             stats['max'] = solve_time if solve_time > stats['max'] else stats['max']
             length = len(scramble.split(' ')) * 3 - 1
+            if(solve_num >= 0):
+                print('{0:>5}'.format(str(solve_num)+':'), end=' ')
             print(('solved {0:<'+str(length)+'}').format(scramble), '=>  ', ('{0:<'+str(length)+'}').format(get_solution(leaf, '')), str(round(solve_time, 2)), '\t', tree.root.N)
             break
         else:

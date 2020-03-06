@@ -48,7 +48,47 @@ Results using mcts tests
 	- model_300
 		- 20736 out of 20736 4-move scrambles, avg 0.05, max 0.57
 		- 1000 out of 1000 5-move scrambles, avg 0.23, max 6.22, limit 300
-
+		- 997 out of 1000 6-move scrambles, avg 0.99, max 30.02, limit 300
+	=== ensured scrambles don't immediately undo themselves ===
+	- model_350
+		- 995 6-move scrambles, avg 7.79, max 549.97, limit 600, UCT 16
+	- model_400
+		- 997  6-move scrambles, avg 5.80, max 435.14, limit 600, UCT 16
+		- 997  6-move scrambles, avg 6.04, max 355.13, limit 600, UCT 16
+		- 1000 6-move scrambles, avg 6.93, max 484.71, limit 1800, UCT 16
+		- 999  6-move scrambles, avg 2.64, max 526.79, limit 600, UCT 6
+		- 871  7-move scrambles, avg 13.79, max 586.71, limit 600
+	- model_450
+		- 1000 6-move scrambles, avg 1.37, max 68.44, limit 600, UCT 6
+		- 873  7-move scrambles, avg 17.43, max 578.1, limit 600
+	- model_500 (new loss scaling) - DELETED
+		- 1000 5-move scrambles, avg 0.28, max 6.14
+		- 990  6-move scrambles, avg 2.62, max 267.43, limit 600
+		- 993  6-move scrambles, avg 2.01, max 295.52, limit 600
+		- 992  6-move scrambles, avg 3.16, max 576.5,  limit 600
+	- model_500 (original scaling)
+		- 1000 5-move scrambles, avg 0.26, max 6.38
+		- 1000 5-move scrambles, avg 0.27, max 7.14
+		- 998  6-move scrambles, avg 1.24, max 23.04,  limit 600
+		- 999  6-move scrambles, avg 1.26, max 22.88,  limit 600
+		- 997  6-move scrambles, avg 1.54, max 119.33, limit 600
+		- 997  6-move scrambles, avg 1.49, max 96.15,  limit 1800
+	- model_600 (400 to 500 with new loss scaling)
+		- 100% 4-move scrambles, avg 0.05, max 0.88
+		- 999  5-move scrambles, avg 0.25, max 3.35,  limit 30
+		- 994  6-move scrambles, avg 1.75, max 346.3, limit 600
+	- model_600 (original scaling)
+		- 100% 4-move scrambles, avg 0.05, max 0.61
+		- 1000 5-move scrambles, avg 0.23, max 2.22
+		- 997  6-move scrambles, avg 1.22, max 23.44, limit 600
+		- 997  6-move scrambles, avg 1.22, max 26.78, limit 600
+	- model_650
+		- 999  6-move scrambles, avg 1.18, max 23.48,  limit 600
+		- 998  6-move scrambles, avg 1.51, max 314.79, limit 600
+	- model_700
+		- 1000 6-move scrambles, avg 1.38, max 219.84
+		- 1000 6-move scrambles, avg 1.10, max 21.31
+		
 	- v1 - original
 		- 3-move: 0.04 avg 0.22 max
 	- v2 - tanh everything - giraffe

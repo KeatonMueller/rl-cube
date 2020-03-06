@@ -2,14 +2,11 @@ import torch
 import torch.optim as optim
 import torch.nn.functional as F
 from torch.utils import data
-import random, copy
 import argparse
 
 import cube as C
-from cube_net import CubeNet
-from data_generation import generate_training_data, Dataset
-from naive_test import naive_test
-from mcts_test import mcts_test, attempt_solve
+from autodidactic_iteration import ADI
+from value_iteration import AVI
 
 move_to_idx = {
     'R'  : 0,
@@ -57,6 +54,7 @@ if __name__ == "__main__":
     parser.add_argument('-b', '--batch', type=int, default=64, help='batch size during training')
     parser.add_argument('-r', '--learning_rate', type=float, default=0.01, help='learning rate of optimizer')
     parser.add_argument('-t', '--test', type=str, nargs='+', default='[none]', help='what kinds of tests to run (like `naive` or `mcts`)')
+    parser.add_argument('-v', '--value_iteration', action='store_true', default=False, help='use value iteration method')
     parser.add_argument('--limit', type=int, default=5, help='time limit (in seconds) for each mcts solve attempt')
     parser.add_argument('--load', metavar='PATH', type=str, help='load model parameters from a file')
     parser.add_argument('--save', metavar='PATH', type=str, help='save model parameters to a file')
@@ -81,92 +79,39 @@ if __name__ == "__main__":
 
     # device for CPU or GPU calculations
     device = torch.device('cuda:0') if torch.cuda.is_available() else torch.device('cpu')
-    # initialize CubeNet and optimizer
-    net = CubeNet().to(device)
-    optimizer = optim.SGD(net.parameters(), lr=LR)
 
-    # load model
-    if(args.load):
-        # load model checkpoint
-        checkpoint = torch.load(args.load, map_location=device)
-        net.load_state_dict(checkpoint['model_state_dict'])
-        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-        net.eval()
-        print('loaded', args.load)
+    # if using the default autodidactic iteration method
+    if(not args.value_iteration):
+        # initialize CubeNet and optimizer
+        adi = ADI(LR)
 
-    # train model
-    if(args.train):
-        # report device being trained with
-        print('training with', device)
-        # allow torch to optimize algorithms
-        torch.backends.cudnn.benchmark = True
-        # loop over the periods
-        for period in range(PERIODS):
-            print('period:', period)
-            # generate new training data
-            X, Y = generate_training_data(NUM_SCRAMBLES, SCRAMBLE_LENGTH, net)
-            '''
-            dataset = Dataset(NUM_SCRAMBLES, SCRAMBLE_LENGTH, net)
-            data_generator = data.DataLoader(dataset, batch_size=BATCH_SIZE, num_workers=4)
-            '''
-            # enter training mode
-            net.train()
-            # loop over the epochs
-            for epoch in range(EPOCHS):
-                print('\t\tepoch:', epoch, end='\t')
-                for x, y in zip(X, Y):
-                # for x, y in data_generator:
-                    # get expected output
-                    x, distance = x
-                    y_v, y_p = y
-                    '''
-                    # import pdb; pdb.set_trace()
-                    y_v, y_p = zip(y)
-                    y_v = y_v[0]
-                    y_p = y_p[0]
-                    y_p = torch.squeeze(y_p, dim=1)
-                    '''
-                    # calculate network's output
-                    net.zero_grad()
-                    out_v, out_p = net(x)
-                    # out_p = torch.squeeze(out_p, dim=1)
+        # load model
+        if(args.load):
+            adi.load(args.load)
 
-                    # compute and sum loss
-                    loss_v = F.mse_loss(out_v, y_v)
-                    loss_p = F.cross_entropy(out_p, y_p)
-                    loss = loss_v + loss_p
-                    loss = loss * (1 / distance)
-                    # update weights
-                    loss.backward()
-                    optimizer.step()
+        # train model
+        if(args.train):
+            adi.fit(PERIODS, EPOCHS, NUM_SCRAMBLES, SCRAMBLE_LENGTH)
 
-                # report loss
-                print('loss:', loss.item())
+        # test model
+        if('none' not in args.test):
+            adi.test(args.test, SCRAMBLE_LENGTH, TIME_LIMIT)
 
-    # test model
-    if('none' not in args.test):
-        if('naive' in args.test):
-            # run a naive test
-            naive_test(net, SCRAMBLE_LENGTH)
-        if('mcts' in args.test):
-            # run a mcts test
-            mcts_test(net, SCRAMBLE_LENGTH, TIME_LIMIT)
-
-    # interactive solve mode
-    if(args.solve):
-        cube = C.Cube()
-        scramble = get_scramble()
-        while(scramble):
-            cube.reset()
-            for move in scramble:
-                cube.idx_turn(move_to_idx[move])
-            attempt_solve(net, cube, TIME_LIMIT, None, ' '.join(scramble))
+        # interactive solve mode
+        if(args.solve):
+            cube = C.Cube()
             scramble = get_scramble()
+            while(scramble):
+                cube.reset()
+                for move in scramble:
+                    cube.idx_turn(move_to_idx[move])
+                adi.solve(cube, TIME_LIMIT, ' '.join(scramble))
+                scramble = get_scramble()
 
-    # save model
-    if(args.save):
-        torch.save({
-            'model_state_dict': net.state_dict(),
-            'optimizer_state_dict': optimizer.state_dict()
-        }, args.save)
-        print('saved model as', args.save)
+        # save model
+        if(args.save):
+            adi.save(args.save)
+
+    # if using the value iteration method
+    else:
+        pass
