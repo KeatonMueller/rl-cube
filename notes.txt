@@ -1,55 +1,20 @@
-Results using naive tests
-
-	- with SGD optimizer and lr = 0.1, solved 12 out of 12 1-move scrambles
-		- periods = 5, epochs = 5, batch size = 1
-		- NUM_SCRAMBLES = 50, SCRAMBLE_LENGTH = 1
-
-	- with SGD optimizer and lr = 0.01, solved 122 out of 144 2-move scrambles
-		- periods = 10, epochs = 50, batch size = 1
-		- NUM_SCRAMBLES = 50, SCRAMBLE_LENGTH = 2
-
 Results using mcts tests
-	- with SGD optimizer and lr = 0.01, solved 144 out of 144 2-move scrambles
-		- periods = 50, epochs = 10, batch size = 1
-		- time_limit = 5
-		- NUM_SCRAMBLES = 50, SCRAMBLE_LENGTH = 2
-
-	- with SGD optimizer and lr = 0.01, solved 1728 out of 1728 3-move scrambles
-		- periods = 80, epochs = 50, batch size = 1
-		- time_limit = 5
-		- NUM_SCRAMBLES = 100, SCRAMBLE_LENGTH = 3
-
-	- with SGD optimizer and lr = 0.01, solved 20423 out of 20736 4-move scrambles
-		- periods = 80, epochs = 50, batch size = 1
-		- time_limit = 5
-		- NUM_SCRAMBLES = 100, SCRAMBLE_LENGTH = 3
-
-	- with SGD optimizer and lr = 0.01, solved 20591 out of 20736 4-move scrambles
-		- periods = 100, epochs = 50, batch size = 1
-		- time_limit = 5
-		- NUM_SCRAMBLES = 100, SCRAMBLE_LENGTH = 4
-
-	- model_100_50_100_3_4 - 20427 out of 20736 (98.51%) of 4-move scrambles
-		- was model_80_50_100_3 trained with 20 periods of 4-move scrambles
-
-	- model_100_50_100_4_lw - 20710 out of 20736 (99.87%) of 4-move scrambles (solved 100% with avg 0.24)
-	- model_130_50_100_4_lw - 20727 out of 20736 (99.96%) of 4-move scrambles
-	- model_300_50_100_4_lw - 20736 out of 20736 (100.0%) of 4-move scrambles, avg 0.16 seconds
-
-	- model_100_50_100_30
-		- 20736 out of 20736 (100.0%) of 4-move scrambles, avg 0.07 seconds
-		- 1000 out of 1000 5-move scrambles, avg 0.71
-	- model_150_50_100_30
-		- 20736 out of 20736 4-move scrambles, avg 0.06, max 2.81
-		- 1000 out of 1000 5-move scrambles, avg 0.29, max 9.04, limit 300
-		- 997 out of 1000 6-move scrambles, avg 1.47, limit 300
+	- model_100
+		- 100% 4-move scrambles, avg 0.07 seconds
+		- 1000 5-move scrambles, avg 0.71
+	- model_150
+		- 100% 4-move scrambles, avg 0.06, max 2.81
+		- 1000 5-move scrambles, avg 0.29, max 9.04, limit 300
+		- 997  6-move scrambles, avg 1.47, limit 300
 	- model_200
-		- 996 out of 1000 6-move scrambles, avg 1.13, max 90.87, limit 300
+		- 996  6-move scrambles, avg 1.13, max 90.87, limit 300
 	- model_300
-		- 20736 out of 20736 4-move scrambles, avg 0.05, max 0.57
-		- 1000 out of 1000 5-move scrambles, avg 0.23, max 6.22, limit 300
-		- 997 out of 1000 6-move scrambles, avg 0.99, max 30.02, limit 300
+		- 100% 4-move scrambles, avg 0.05, max 0.57
+		- 1000 5-move scrambles, avg 0.23, max 6.22, limit 300
+		- 997  6-move scrambles, avg 0.99, max 30.02, limit 300
+		
 	=== ensured scrambles don't immediately undo themselves ===
+
 	- model_350
 		- 995 6-move scrambles, avg 7.79, max 549.97, limit 600, UCT 16
 	- model_400
@@ -88,7 +53,7 @@ Results using mcts tests
 	- model_700
 		- 1000 6-move scrambles, avg 1.38, max 219.84
 		- 1000 6-move scrambles, avg 1.10, max 21.31
-		
+
 	- v1 - original
 		- 3-move: 0.04 avg 0.22 max
 	- v2 - tanh everything - giraffe
