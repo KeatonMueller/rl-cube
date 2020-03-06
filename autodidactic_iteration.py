@@ -102,7 +102,7 @@ class ADI:
             mcts_test(self.model, SCRAMBLE_LENGTH, TIME_LIMIT)
 
     def solve(self, cube, TIME_LIMIT, scramble):
-        attempt_solve(self.model, cube, TIME_LIMIT, None, ' '.join(scramble))
+        attempt_solve(self.model, cube, TIME_LIMIT, None, scramble)
 
 
     def save(self, PATH):
