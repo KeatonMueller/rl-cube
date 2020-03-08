@@ -53,6 +53,21 @@ Results using mcts tests
 	- model_700
 		- 1000 6-move scrambles, avg 1.38, max 219.84
 		- 1000 6-move scrambles, avg 1.10, max 21.31
+		- 999  6-move scrambles, avg 1.06, max 16.01,  limit 600
+		- 999  6-move scrambles, avg 1.10, max 14.59,  limit 600
+		- 997  6-move scrambles, avg 1.17, max 26.50,  limit 600
+		- 999  6-move scrambles, avg 1.22, max 155.91, limit 600
+		- 1000 6-move scrambles, avg 1.16, max 21.74
+		- 902  7-move scrambles, avg 9.62, max 584.03, limit 600
+		- failed solves
+			- U F' D U F D'
+			- R' F B' F D' B
+			- F D R' B' R U
+			- L B L' R F' L
+			- R' U' B L D L
+	- model_800
+		- 992  6-move scrambles, avg 1.63, max 68.60, limit 600
+		- 995  6-move scrambles, avg 1.29, max 29.36, limit 600
 
 	- v1 - original
 		- 3-move: 0.04 avg 0.22 max
