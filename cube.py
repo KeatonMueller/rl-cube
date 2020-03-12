@@ -182,7 +182,7 @@ class Cube():
         flattened = []
         for loc in self.arr:
             flattened.extend([1.0 if i == loc else 0.0 for i in range(24)])
-        return torch.tensor([flattened], device=device)
+        return torch.tensor([flattened])
 
     def get_array(self):
         '''

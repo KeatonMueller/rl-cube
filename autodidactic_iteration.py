@@ -68,6 +68,10 @@ class ADI:
                     # get expected output
                     x, distance = x
                     y_v, y_p = y
+                    # send them to the device
+                    x.to(device)
+                    y_v.to(device)
+                    y_p.to(device)
 
                     # calculate network's output
                     self.model.zero_grad()
