@@ -80,6 +80,9 @@ class ResCubeNet(nn.Module):
         self.res4b = nn.Linear(1000, 1000)
         self.res4b_bn = nn.BatchNorm1d(1000)
 
+        # output layer
+        self.out = nn.Linear(1000, 1)
+
         # identity layer for residual connections
         self.identity = nn.Identity(1000)
 
@@ -106,4 +109,6 @@ class ResCubeNet(nn.Module):
         # fourth residual block
         residual = self.identity(x)
         x = relu(self.res4a_bn(self.res4a(x)))
-        return relu(self.res4b_bn(self.res4b(x)) + residual)
+        x = relu(self.res4b_bn(self.res4b(x)) + residual)
+
+        return self.out(x)

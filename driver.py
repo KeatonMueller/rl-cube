@@ -121,6 +121,8 @@ def main():
 
     # if using the value iteration method
     else:
+        avi = AVI()
+        avi.train(10, 5, 2)
         pass
 
 if __name__ == "__main__":
