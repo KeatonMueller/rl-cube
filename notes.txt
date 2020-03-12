@@ -120,6 +120,14 @@ Time to train with CUDA
 	- NUM_SCRAMBLES = 100, SCRAMBLE_LENGTH = 30
 		- about 200:00 to train
 
+Time to train Home machine vs Zoo machine
+	-p 5 -e 10 -n 100 -l 4
+		- Home: 135.68 seconds
+		- Zoo: 179.69 seconds
+	-p 10 -e 20 -n 100 -l 4
+		- Home: 478.95 seconds
+		- Zoo: 638.48 seconds
+
 To-Do:
 	- add batching
 	- add BFS following MCTS to shorten solution lengths
