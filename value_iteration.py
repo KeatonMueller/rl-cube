@@ -24,7 +24,7 @@ class AVI:
 
         self.seen_states = set()
 
-    def label_data(self, X):
+    def get_batches(self, X, batch_size):
         self.model_label.eval()
         with torch.no_grad:
             # empty tensor of labels
@@ -51,11 +51,11 @@ class AVI:
     def fit(self, X, Y):
         pass
 
-    def train(self, iterations, num_scrambles, max_updates):
+    def train(self, iterations, num_scrambles, batch_size, max_updates):
         num_updates = 0
         for i in iterations:
             X = generate_training_data_avi(num_scrambles, 30)
-            Y = label_data(X)
+            batches = self.get_batches(X, batch_size)
             fit(X, Y)
             if(len(seen_states) > STATES_PER_UPDATE):
                 self.model_label.load_state_dict(model_train.state_dict())
