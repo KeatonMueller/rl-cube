@@ -3,10 +3,16 @@ import torch.optim as optim
 import torch.nn.functional as F
 from torch.utils import data
 import argparse
+import sys
 
 import cube as C
 from autodidactic_iteration import ADI
 from value_iteration import AVI
+
+# global variables
+args = None
+adi = None
+avi = None
 
 move_to_idx = {
     'R'  : 0,
@@ -45,7 +51,8 @@ def get_scramble():
         else:
             return scramble
 
-if __name__ == "__main__":
+def main():
+    global args, adi, avi
     parser = argparse.ArgumentParser(description = 'Run rl-cube')
     parser.add_argument('-p', '--periods', type=int, default=1, help='number of times to generate new training data')
     parser.add_argument('-e', '--epochs', type=int, default=5, help='number of times to evaluate all of the training data per period')
@@ -115,3 +122,14 @@ if __name__ == "__main__":
     # if using the value iteration method
     else:
         pass
+
+if __name__ == "__main__":
+    try:
+        main()
+    except KeyboardInterrupt:
+        print('\ninterrupted')
+        if(not args.value_iteration):
+            # save the model if it was being trained
+            if(args.train):
+                adi.save('model_interrupt')
+        sys.exit(0)
