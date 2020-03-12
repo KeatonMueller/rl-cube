@@ -7,7 +7,7 @@ import sys
 
 import cube as C
 from autodidactic_iteration import ADI
-from value_iteration import AVI
+from approximate_value_iteration import AVI
 
 # global variables
 args = None
@@ -55,13 +55,13 @@ def main():
     global args, adi, avi
     parser = argparse.ArgumentParser(description = 'Run rl-cube')
     parser.add_argument('-p', '--periods', type=int, default=1, help='number of times to generate new training data')
-    parser.add_argument('-e', '--epochs', type=int, default=5, help='number of times to evaluate all of the training data per period')
-    parser.add_argument('-n', '--number', type=int, default=50, help='number of cubes to scramble per data generation')
-    parser.add_argument('-l', '--length', type=int, default=2, help='length of each scramble')
+    parser.add_argument('-e', '--epochs', type=int, default=50, help='number of times to evaluate all of the training data per period')
+    parser.add_argument('-n', '--number', type=int, default=100, help='number of cubes to scramble per data generation')
+    parser.add_argument('-l', '--length', type=int, default=30, help='length of each scramble')
     parser.add_argument('-b', '--batch', type=int, default=64, help='batch size during training')
     parser.add_argument('-r', '--learning_rate', type=float, default=0.01, help='learning rate of optimizer')
     parser.add_argument('-t', '--test', type=str, nargs='+', default='[none]', help='what kinds of tests to run (like `naive` or `mcts`)')
-    parser.add_argument('-v', '--value_iteration', action='store_true', default=False, help='use value iteration method')
+    parser.add_argument('-avi', '--approximate_value_iteration', action='store_true', default=False, help='use approximate value iteration method')
     parser.add_argument('--limit', type=int, default=5, help='time limit (in seconds) for each mcts solve attempt')
     parser.add_argument('--load', metavar='PATH', type=str, help='load model parameters from a file')
     parser.add_argument('--save', metavar='PATH', type=str, help='save model parameters to a file')
@@ -88,7 +88,7 @@ def main():
     device = torch.device('cuda:0') if torch.cuda.is_available() else torch.device('cpu')
 
     # if using the default autodidactic iteration method
-    if(not args.value_iteration):
+    if(not args.approximate_value_iteration):
         # initialize CubeNet and optimizer
         adi = ADI(LR)
 
@@ -130,8 +130,8 @@ if __name__ == "__main__":
         main()
     except KeyboardInterrupt:
         print('\ninterrupted')
-        if(not args.value_iteration):
-            # save the model if it was being trained
-            if(args.train):
+        if(not args.approximate_value_iteration):
+            # save the interrupted model if it was supposed to be saved
+            if(args.save):
                 adi.save('model_interrupt')
         sys.exit(0)
