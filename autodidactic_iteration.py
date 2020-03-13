@@ -9,6 +9,7 @@ from cube_net import CubeNet
 from data_generation import generate_training_data_adi
 from naive_test import naive_test
 from mcts_test import mcts_test, attempt_solve
+import progress_printer as prog_print
 
 # device for CPU or GPU calculations
 device = torch.device('cuda:0') if torch.cuda.is_available() else torch.device('cpu')
@@ -53,9 +54,7 @@ class ADI:
             print('period:', period)
             # generate new training data
             X, Y = generate_training_data_adi(NUM_SCRAMBLES, SCRAMBLE_LENGTH, self.model)
-
             train_len = len(X)
-            print_len = len(str(train_len)) * 2 + 1
 
             # enter training mode
             self.model.train()
@@ -63,8 +62,8 @@ class ADI:
             for epoch in range(EPOCHS):
                 # print('\tepoch:', epoch, end='\t')
                 for i, (x, y) in enumerate(zip(X, Y)):
-                    progress = int(i / train_len * progress_bar_len)
-                    print('\tepoch:', epoch, '\t[' + str('='*progress) + '>' + str(' '*(progress_bar_len-progress)) + (']\t{0:>'+str(print_len)+'}').format(str(i)+'/'+str(train_len)), end='\r')
+                    # print progress
+                    prog_print.print_progress(('\tepoch: ' + str(epoch)), i, train_len, 18)
                     # get expected output
                     x, distance = x
                     y_v, y_p = y
@@ -87,8 +86,8 @@ class ADI:
                     loss.backward()
                     self.optimizer.step()
 
-                # report loss
-                print('\tepoch:', epoch, '\t[' + ('='*(progress_bar_len+1)) + ']\tloss:', loss.item())
+                # print completed progress and report loss
+                prog_print.print_progress_done(('\tepoch: ' + str(epoch)), train_len, 18, ('loss: ' + str(loss.item())))
 
     def test(self, tests, SCRAMBLE_LENGTH, TIME_LIMIT):
         '''
