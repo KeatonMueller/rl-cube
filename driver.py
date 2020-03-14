@@ -122,7 +122,7 @@ def main():
     # if using the value iteration method
     else:
         avi = AVI()
-        avi.train(10, 5, 2)
+        avi.train(num_scrambles=1000, batch_size=20, label_batch_size=1000, max_updates=2)
         pass
 
 if __name__ == "__main__":

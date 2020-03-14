@@ -1,4 +1,4 @@
-def print_progress(start, done, total, progress_bar_len):
+def print_progress(start, done, total, progress_bar_len=18):
     '''
         print animated progress 'frame'
 
@@ -16,7 +16,7 @@ def print_progress(start, done, total, progress_bar_len):
             ('{0:>' + str(print_len) + '}').format(str(done) + '/' +str(total)), end='\r' \
          )
 
-def print_progress_done(start, total, progress_bar_len, end=''):
+def print_progress_done(start, total, progress_bar_len=18, end=''):
     '''
         print completed progress bar
 

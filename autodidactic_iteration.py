@@ -63,7 +63,7 @@ class ADI:
                 # print('\tepoch:', epoch, end='\t')
                 for i, (x, y) in enumerate(zip(X, Y)):
                     # print progress
-                    prog_print.print_progress(('\tepoch: ' + str(epoch)), i, train_len, 18)
+                    prog_print.print_progress(('\tepoch: ' + str(epoch)), i, train_len)
                     # get expected output
                     x, distance = x
                     y_v, y_p = y
@@ -87,7 +87,7 @@ class ADI:
                     self.optimizer.step()
 
                 # print completed progress and report loss
-                prog_print.print_progress_done(('\tepoch: ' + str(epoch)), train_len, 18, ('loss: ' + str(loss.item())))
+                prog_print.print_progress_done(('\tepoch: ' + str(epoch)), train_len, end=('loss: ' + str(loss.item())))
 
     def test(self, tests, SCRAMBLE_LENGTH, TIME_LIMIT):
         '''

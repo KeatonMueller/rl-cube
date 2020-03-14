@@ -216,3 +216,9 @@ class Cube():
             corresponds to a tuple of the state array
         '''
         return hash(tuple(self.arr))
+
+    def __eq__(self, other):
+        '''
+            assesses equality of two Cube objects
+        '''
+        return self.arr == other.arr
