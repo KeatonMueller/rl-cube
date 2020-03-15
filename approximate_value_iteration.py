@@ -28,6 +28,20 @@ class AVI:
 
         self.seen_states = set()
 
+    def load(self, PATH):
+        '''
+            load model checkpoint
+
+            PATH: path to model checkpoint
+        '''
+        checkpoint = torch.load(PATH, map_location=device)
+        self.model_label.load_state_dict(checkpoint['model_state_dict'])
+        self.model_train.load_state_dict(checkpoint['model_state_dict'])
+        self.optim_train.load_state_dict(checkpoint['optimizer_state_dict'])
+        self.model_label.eval()
+        self.model_train.train()
+        print('loaded', PATH)
+
     def cubes_to_input(self, samples):
         '''
             converts a list of Cube objects into a pytorch tensor for input into a network
@@ -123,27 +137,39 @@ class AVI:
             epochs: number of epochs to train for
             batches: training data
         '''
+        # decouple the input and output batches
         X_batches, Y_batches = batches
+        # determine batch size
         batch_size = X_batches.size()[1]
+        # compute total number of scrambles (for progress printing)
         total = X_batches.size()[0] * X_batches.size()[1]
-
+        # train model
+        self.model_train.train()
         for e in range(epochs):
-            # keep track of number of batches trained for printing purposes
+            # keep track of number of batches trained (for printing purposes)
             num = 0
+            # for each batch
             for x_batch, y_batch in zip(X_batches, Y_batches):
+                # print progress
                 prog_print.print_progress(('epoch: ' + str(e)), num*batch_size+batch_size, total)
                 num += 1
+                # send batch to device
                 x_batch = x_batch.to(device)
                 y_batch = y_batch.to(device)
+                # zero out the gradient
                 self.model_train.zero_grad()
+                # get the outputs
                 output = self.model_train(x_batch)
+                # compute loss
                 loss = F.mse_loss(y_batch, output)
+                # backprop
                 loss.backward()
+                # update weights
                 self.optim_train.step()
-
+            # print final loss after finishing epoch
             prog_print.print_progress_done(('epoch: ' + str(e)), total, end=('loss: ' + str(loss.item())))
 
-    def train(self, num_scrambles, batch_size, label_batch_size, max_updates):
+    def train(self, epochs, num_scrambles, batch_size, label_batch_size, max_updates):
         # check that the number of scrambles can be split into batches evenly
         # (this is up to the caller to ensure)
         if(num_scrambles % batch_size != 0):
@@ -151,18 +177,46 @@ class AVI:
             exit()
 
         num_updates = 0
-        # for i in range(1): # this should be a while(num_updates < max_updates) once things are working
+        # until we've hit the desired number of updates
         while(num_updates < max_updates):
-            print('seen', len(self.seen_states), 'states')
+            # generate Cube object samples
             samples = generate_training_data_avi(num_scrambles, 30)
 
+            # convert them to tensors for input to network
             X = self.cubes_to_input(samples)
+            # generate labels for the samples
             Y = self.label_samples(samples, label_batch_size)
+            # convert data into batches
             batches = self.get_batches(X, Y, batch_size)
-
-            self.fit(3, batches)
+            # train model
+            self.fit(epochs, batches)
+            # report number of unique cube states encountered so far
+            print('seen', len(self.seen_states), 'states')
             exit()
+            # if number exceeds threshold, update model_label
             if(len(self.seen_states) > STATES_PER_UPDATE):
                 self.model_label.load_state_dict(self.model_train.state_dict())
                 self.seen_states = set()
                 num_updates += 1
+
+    def test(self, tests, scramble_length, time_limit):
+        '''
+            perform requested tests of the model
+
+            tests: list of test names
+            scramble_length: length of scrambles to test
+            time_limit: time to attempt each solve
+        '''
+        pass
+        
+    def save(self, PATH):
+        '''
+            save model checkpoint
+
+            PATH: location to save model checkpoint
+        '''
+        torch.save({
+            'model_state_dict': self.model_train.state_dict(),
+            'optimizer_state_dict': self.optim_train.state_dict()
+        }, PATH)
+        print('saved model as', PATH)

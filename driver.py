@@ -58,9 +58,11 @@ def main():
     parser.add_argument('-e', '--epochs', type=int, default=50, help='number of times to evaluate all of the training data per period')
     parser.add_argument('-n', '--number', type=int, default=100, help='number of cubes to scramble per data generation')
     parser.add_argument('-l', '--length', type=int, default=30, help='length of each scramble')
-    parser.add_argument('-b', '--batch', type=int, default=64, help='batch size during training')
     parser.add_argument('-r', '--learning_rate', type=float, default=0.01, help='learning rate of optimizer')
     parser.add_argument('-t', '--test', type=str, nargs='+', default='[none]', help='what kinds of tests to run (like `naive` or `mcts`)')
+    parser.add_argument('-m', '--max_updates', type=int, default=10, help='maximum number of times to update the labelling model during AVI')
+    parser.add_argument('-b', '--batch_size', type=int, default=1000, help='batch size during training')
+    parser.add_argument('-lb', '--label_batch_size', type=int, default=1000, help='batch size for labelling training examples')
     parser.add_argument('-avi', '--approximate_value_iteration', action='store_true', default=False, help='use approximate value iteration method')
     parser.add_argument('--limit', type=int, default=5, help='time limit (in seconds) for each mcts solve attempt')
     parser.add_argument('--load', metavar='PATH', type=str, help='load model parameters from a file')
@@ -80,7 +82,11 @@ def main():
     # time limit for mcts solve attempt
     TIME_LIMIT = args.limit
     # batch size
-    BATCH_SIZE = args.batch
+    BATCH_SIZE = args.batch_size
+    # label batch size
+    LABEL_BATCH_SIZE = args.label_batch_size
+    # max updates
+    MAX_UPDATES = args.max_updates
     # learning rate of optimizer
     LR = args.learning_rate
 
@@ -122,8 +128,21 @@ def main():
     # if using the value iteration method
     else:
         avi = AVI()
-        avi.train(num_scrambles=1000, batch_size=20, label_batch_size=1000, max_updates=2)
-        pass
+        # load model
+        if(args.load):
+            avi.load(args.load)
+
+        # train model
+        if(args.train):
+            avi.train(EPOCHS, NUM_SCRAMBLES, BATCH_SIZE, LABEL_BATCH_SIZE, MAX_UPDATES)
+
+        # test model
+        if('none' not in args.test):
+            avi.test(args.test, SCRAMBLE_LENGTH, TIME_LIMIT)
+
+        # save model
+        if(args.save):
+            avi.save(args.save)
 
 if __name__ == "__main__":
     try:
@@ -133,5 +152,9 @@ if __name__ == "__main__":
         if(not args.approximate_value_iteration):
             # save the interrupted model if it was supposed to be saved
             if(args.save):
-                adi.save('model_interrupt')
+                adi.save('model_interrupt_adi')
+        else:
+            # save the interrupted model if it was supposed to be saved 
+            if(args.save):
+                avi.save('model_interrupt_avi')
         sys.exit(0)

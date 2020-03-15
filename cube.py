@@ -125,6 +125,19 @@ def arr_to_matrix(arr):
         matrix.append([1 if i == loc else 0 for i in range(24)])
     return matrix
 
+def get_neighbors(cube):
+    '''
+        return all 12 cube states reachable from given state
+        with an outer layer quarter turn
+
+        cube: Cube object from which to get neighbors
+    '''
+    neighbors = []
+    for idx in range(12):
+        neighbor = Cube(cube)
+        neighbor.idx_turn(idx)
+        neighbors.append(neighbor)
+    return neighbors
 
 class Cube():
     def __init__(self, cube=None):
