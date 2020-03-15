@@ -7,10 +7,11 @@ from math import ceil
 import cube as C
 from cube_net import ResCubeNet
 from data_generation import generate_training_data_avi
+from a_star_test import a_star_test, attempt_solve
 import progress_printer as prog_print
 
 # see 10,000,000 unique states before updating parameters
-STATES_PER_UPDATE = 100000
+STATES_PER_UPDATE = 50000
 
 # device for CPU or GPU calculations
 device = torch.device('cuda:0') if torch.cuda.is_available() else torch.device('cpu')
@@ -192,9 +193,9 @@ class AVI:
             self.fit(epochs, batches)
             # report number of unique cube states encountered so far
             print('seen', len(self.seen_states), 'states')
-            exit()
             # if number exceeds threshold, update model_label
             if(len(self.seen_states) > STATES_PER_UPDATE):
+                print('updating model_label')
                 self.model_label.load_state_dict(self.model_train.state_dict())
                 self.seen_states = set()
                 num_updates += 1
@@ -207,8 +208,12 @@ class AVI:
             scramble_length: length of scrambles to test
             time_limit: time to attempt each solve
         '''
-        pass
-        
+        if('a_star' in tests):
+            a_star_test(self.model_label, scramble_length, time_limit)
+
+    def solve(self, cube, time_limit, scramble):
+        attempt_solve(self.model_label, cube, time_limit, None, scramble)
+
     def save(self, PATH):
         '''
             save model checkpoint

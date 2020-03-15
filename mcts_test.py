@@ -89,7 +89,7 @@ class Node:
 
 def mcts_test(net, length, time_limit):
     '''
-        uses MCTS to test the network on every scramble of the requested length
+        uses MCTS to test the network on scrambles of the requested length
 
         net: a CubeNet network
         length: the length of the scramble to attempt to solve
@@ -181,6 +181,8 @@ def attempt_solve(net, cube, time_limit, stats, scramble, solve_num=-1):
         net: a CubeNet used to aid the tree traversal
         n: the number of traversals allowed in the attempt
         stats: a map keeping track of number of successful solves and solve attempts
+        scramble: a string holding the scramble being solved
+        solve_num: (optional) the number solve being attempted
     '''
     stats = stats if stats else { 'hits': 0, 'total': 0, 'time': 0, 'max': -1, 'fails': [] }
     tree = Tree(cube, net)

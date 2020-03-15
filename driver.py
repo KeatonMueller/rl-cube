@@ -60,7 +60,7 @@ def main():
     parser.add_argument('-l', '--length', type=int, default=30, help='length of each scramble')
     parser.add_argument('-r', '--learning_rate', type=float, default=0.01, help='learning rate of optimizer')
     parser.add_argument('-t', '--test', type=str, nargs='+', default='[none]', help='what kinds of tests to run (like `naive` or `mcts`)')
-    parser.add_argument('-m', '--max_updates', type=int, default=10, help='maximum number of times to update the labelling model during AVI')
+    parser.add_argument('-m', '--max_updates', type=int, default=2, help='maximum number of times to update the labelling model during AVI')
     parser.add_argument('-b', '--batch_size', type=int, default=1000, help='batch size during training')
     parser.add_argument('-lb', '--label_batch_size', type=int, default=1000, help='batch size for labelling training examples')
     parser.add_argument('-avi', '--approximate_value_iteration', action='store_true', default=False, help='use approximate value iteration method')
@@ -140,6 +140,17 @@ def main():
         if('none' not in args.test):
             avi.test(args.test, SCRAMBLE_LENGTH, TIME_LIMIT)
 
+        # interactive solve mode
+        if(args.solve):
+            cube = C.Cube()
+            scramble = get_scramble()
+            while(scramble):
+                cube.reset()
+                for move in scramble:
+                    cube.idx_turn(move_to_idx[move])
+                avi.solve(cube, TIME_LIMIT, ' '.join(scramble))
+                scramble = get_scramble()
+
         # save model
         if(args.save):
             avi.save(args.save)
@@ -154,7 +165,7 @@ if __name__ == "__main__":
             if(args.save):
                 adi.save('model_interrupt_adi')
         else:
-            # save the interrupted model if it was supposed to be saved 
+            # save the interrupted model if it was supposed to be saved
             if(args.save):
                 avi.save('model_interrupt_avi')
         sys.exit(0)
