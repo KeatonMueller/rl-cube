@@ -217,7 +217,7 @@ def get_solution(node, cur_sol):
         node: the node corresponding to the current cube state
         cur_sol: the string representation of the solution
     '''
-    if(len(node.parents) == 0):
+    if(len(node.parents) == 0 or node.chosen_parent == None):
         return cur_sol
     parent = node.chosen_parent
     cur_sol = idx_to_str[parent.chosen_action] + ' ' + cur_sol
@@ -323,7 +323,7 @@ def update_statistics(node, value):
         node: the current stage of traversal
         value: the value of the leaf that's being propagated upward
     '''
-    if(len(node.parents) == 0):
+    if(len(node.parents) == 0 or node.chosen_parent == None):
         return
 
     parent = node.chosen_parent
