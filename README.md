@@ -31,7 +31,7 @@ To see a list of options for this project, clone this repo and run
 
 To type in scrambles for a pre-trained model to attempt to solve, run something like
 
-`python3 driver.py --load model_500 --solve`
+`python3 driver.py --load model_1200 --solve`
 
 Note that as of this time, the model is still in the process of being
 trained. The time it takes to find solutions will vary depending on
