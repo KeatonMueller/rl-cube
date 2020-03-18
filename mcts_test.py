@@ -43,18 +43,15 @@ class Tree:
             cube: a Cube object to be stored at the root
             net: a CubeNet used to guide tree traversal
         '''
-        self.map = dict()
         self.net = net
-        self.root = Node(cube, self.map, self.net)
-        self.map[cube] = self.root
+        self.root = Node(cube, self.net)
 
 class Node:
-    def __init__(self, cube, map, net):
+    def __init__(self, cube, net):
         '''
             initializes a node in the tree
 
             cube: a Cube object to be stored at this node
-            map: a map from Cube objects to their corresponding node
             net: a CubeNet used to guide tree traversal
         '''
         self.children = [ None for i in range(12) ]
@@ -81,7 +78,6 @@ class Node:
         self.P = out_p[0]
 
         self.cube = cube
-        self.map = map
         self.net = net
 
         self.is_terminal = cube.is_solved()
@@ -292,12 +288,7 @@ def expand(node):
     for idx in range(12):
         next_cube = C.Cube(node.cube)
         next_cube.idx_turn(idx)
-        next_node = None
-        if(next_cube in node.map):
-            next_node = node.map[next_cube]
-        else:
-            next_node = Node(next_cube, node.map, node.net)
-            node.map[next_cube] = next_node
+        next_node = Node(next_cube, node.net)
 
         node.children[idx] = next_node
         next_node.parents.append(node)
