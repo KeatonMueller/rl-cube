@@ -228,7 +228,7 @@ class AVI:
             interrupted: indicate if save is due to an interrupt in training
         '''
         if(interrupted):
-            name = 'model_avi_'+str(self.num_updates)+'_'+str(len(self.seen_states))
+            name = 'model_avi_'+str(self.num_updates)+'_'+str(len(self.seen_states))+'.ckpt'
             torch.save({
                 'model_train_state_dict': self.model_train.state_dict(),
                 'optim_train_state_dict': self.optim_train.state_dict(),
