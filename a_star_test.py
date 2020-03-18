@@ -122,7 +122,7 @@ def pop_batch(open_set, batch_size):
     '''
     popped = []
     for i in range(batch_size):
-        popped.append(heappop(open_set)[1])
+        popped.append(heappop(open_set)[2])
     return popped
 
 def get_solution(cube, cur_sol, cube_to_parent):
@@ -153,6 +153,7 @@ def attempt_solve(model, start_cube, time_limit, stats, scramble, solve_num=-1):
     stats = stats if stats else { 'hits': 0, 'total': 0, 'time': 0, 'max': -1, 'fails': [] }
     batch_size = 1
     start_time = time()
+    push_count = 0
     open_set = []
     cube_to_path_cost = dict()
     cube_to_heuristic = dict()
@@ -167,7 +168,8 @@ def attempt_solve(model, start_cube, time_limit, stats, scramble, solve_num=-1):
         cube_to_f_score[start_cube] = heuristic
         cube_to_parent[start_cube] = None
 
-        heappush(open_set, (cube_to_f_score[start_cube], start_cube))
+        heappush(open_set, (cube_to_f_score[start_cube], push_count, start_cube))
+        push_count += 1
 
         while(time() - start_time < time_limit and len(open_set) > 0):
             # get batch of cubes from open set
@@ -193,11 +195,23 @@ def attempt_solve(model, start_cube, time_limit, stats, scramble, solve_num=-1):
                 for idx, neighbor in enumerate(neighbors):
                     # if we've never seen this state before
                     if(neighbor not in cube_to_f_score):
-                        # compute its heuristic later
-                        cubes_to_compute.append(neighbor)
-                        # set its path cost and parent
-                        cube_to_path_cost[neighbor] = cube_to_path_cost[cube] + 1
-                        cube_to_parent[neighbor] = (cube, idx)
+                        # if this neighbor is solved
+                        if(neighbor.is_solved()):
+                            # set its path cost and parent
+                            cube_to_path_cost[neighbor] = cube_to_path_cost[cube] + 1
+                            cube_to_parent[neighbor] = (cube, idx)
+                            # heuristic is 0 for solved cubes
+                            cube_to_heuristic[neighbor] = 0
+                            cube_to_f_score[neighbor] = cube_to_path_cost[neighbor]
+                            heappush(open_set, (cube_to_f_score[neighbor], push_count, neighbor))
+                            push_count += 1
+                        # if it's not solved
+                        else:
+                            # compute its heuristic later
+                            cubes_to_compute.append(neighbor)
+                            # set its path cost and parent
+                            cube_to_path_cost[neighbor] = cube_to_path_cost[cube] + 1
+                            cube_to_parent[neighbor] = (cube, idx)
                     # if we have seen this state
                     else:
                         # see if we just found a better path
@@ -207,7 +221,9 @@ def attempt_solve(model, start_cube, time_limit, stats, scramble, solve_num=-1):
                             cube_to_path_cost[neighbor] = tentative_path_cost
                             cube_to_f_score[neighbor] = tentative_path_cost + cube_to_heuristic[neighbor]
                             if((cube_to_f_score[neighbor], neighbor) not in open_set):
-                                heappush(open_set, (cube_to_f_score[neighbor], neighbor))
+                                heappush(open_set, (cube_to_f_score[neighbor], push_count, neighbor))
+                                push_count += 1
+            # batched heuristic calulations
             # input tensor to calculate heuristics
             inputs = torch.empty(len(cubes_to_compute), 480, device=device)
             # populate tensor
@@ -219,7 +235,8 @@ def attempt_solve(model, start_cube, time_limit, stats, scramble, solve_num=-1):
             for i, cube in enumerate(cubes_to_compute):
                 cube_to_heuristic[cube] = outputs[i].item()
                 cube_to_f_score[cube] = cube_to_path_cost[cube] + cube_to_heuristic[cube]
-                heappush(open_set, (cube_to_f_score[cube], cube))
+                heappush(open_set, (cube_to_f_score[cube], push_count, cube))
+                push_count += 1
         print('failed solve', scramble)
         stats['fails'].append(scramble)
         stats['total'] += 1

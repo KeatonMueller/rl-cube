@@ -11,7 +11,7 @@ from a_star_test import a_star_test, attempt_solve
 import progress_printer as prog_print
 
 # see 10,000,000 unique states before updating parameters
-STATES_PER_UPDATE = 50000
+STATES_PER_UPDATE = 10000000
 
 # device for CPU or GPU calculations
 device = torch.device('cuda:0') if torch.cuda.is_available() else torch.device('cpu')
@@ -27,6 +27,7 @@ class AVI:
         self.model_label = ResCubeNet().to(device)
         self.model_label.load_state_dict(self.model_train.state_dict())
 
+        self.num_updates = 0
         self.seen_states = set()
 
     def load(self, PATH):
@@ -36,9 +37,15 @@ class AVI:
             PATH: path to model checkpoint
         '''
         checkpoint = torch.load(PATH, map_location=device)
-        self.model_label.load_state_dict(checkpoint['model_state_dict'])
-        self.model_train.load_state_dict(checkpoint['model_state_dict'])
-        self.optim_train.load_state_dict(checkpoint['optimizer_state_dict'])
+        self.num_updates = checkpoint['num_updates']
+        self.model_train.load_state_dict(checkpoint['model_train_state_dict'])
+        self.optim_train.load_state_dict(checkpoint['optim_train_state_dict'])
+        # check if loading from interrupted checkpoint
+        if('seen_states' in checkpoint):
+            self.seen_states = checkpoint['seen_states']
+            self.model_label.load_state_dict(checkpoint['model_label_state_dict'])
+        else:
+            self.model_label.load_state_dict(checkpoint['model_train_state_dict'])
         self.model_label.eval()
         self.model_train.train()
         print('loaded', PATH)
@@ -54,12 +61,10 @@ class AVI:
         X = torch.empty(num_samples, 480)
         # for each cube
         for i, cube in enumerate(samples):
-            prog_print.print_progress('converting', i, num_samples)
-            # mark this state as seen
-            self.seen_states.add(cube)
-            # convert it to a tensor
+            prog_print.print_progress('\tconverting', i, num_samples)
+            # convert cube to a tensor
             X[i] = cube.to_tensor()
-        prog_print.print_progress_done('converted', num_samples)
+        prog_print.print_progress_done('\tconverted', num_samples)
         return X
 
     def label_samples(self, samples, label_batch_size):
@@ -82,7 +87,7 @@ class AVI:
         with torch.no_grad():
             for b in range(num_batches):
                 # print progress
-                prog_print.print_progress('labelling', min(num_samples, b * label_batch_size + label_batch_size), num_samples)
+                prog_print.print_progress('\tlabelling', min(num_samples, b * label_batch_size + label_batch_size), num_samples)
                 # get the batch
                 batch = samples[b * label_batch_size : (b + 1) * label_batch_size]
                 num = 0
@@ -108,7 +113,7 @@ class AVI:
                     # store the min cost as the label for cube x
                     Y[b * label_batch_size + x] = min_cost
             # print completed progress
-            prog_print.print_progress_done('labelled', num_samples)
+            prog_print.print_progress_done('\tlabelled', num_samples)
         # return the labels
         return Y
 
@@ -152,7 +157,7 @@ class AVI:
             # for each batch
             for x_batch, y_batch in zip(X_batches, Y_batches):
                 # print progress
-                prog_print.print_progress(('epoch: ' + str(e)), num*batch_size+batch_size, total)
+                prog_print.print_progress(('\tepoch: ' + str(e)), num*batch_size+batch_size, total)
                 num += 1
                 # send batch to device
                 x_batch = x_batch.to(device)
@@ -168,7 +173,7 @@ class AVI:
                 # update weights
                 self.optim_train.step()
             # print final loss after finishing epoch
-            prog_print.print_progress_done(('epoch: ' + str(e)), total, end=('loss: ' + str(loss.item())))
+            prog_print.print_progress_done(('\tepoch: ' + str(e)), total, end=('loss: ' + str(loss.item())))
 
     def train(self, epochs, num_scrambles, batch_size, label_batch_size, max_updates):
         # check that the number of scrambles can be split into batches evenly
@@ -177,9 +182,8 @@ class AVI:
             print(f'number of scrambles ({num_scrambles}) and batch size ({batch_size}) aren\'t compatible')
             exit()
 
-        num_updates = 0
         # until we've hit the desired number of updates
-        while(num_updates < max_updates):
+        while(self.num_updates < max_updates):
             # generate Cube object samples
             samples = generate_training_data_avi(num_scrambles, 30)
 
@@ -191,14 +195,16 @@ class AVI:
             batches = self.get_batches(X, Y, batch_size)
             # train model
             self.fit(epochs, batches)
+            # update seen states
+            self.seen_states.update(samples)
             # report number of unique cube states encountered so far
-            print('seen', len(self.seen_states), 'states')
+            print('update', self.num_updates, 'seen', len(self.seen_states), 'states')
             # if number exceeds threshold, update model_label
             if(len(self.seen_states) > STATES_PER_UPDATE):
                 print('updating model_label')
                 self.model_label.load_state_dict(self.model_train.state_dict())
                 self.seen_states = set()
-                num_updates += 1
+                self.num_updates += 1
 
     def test(self, tests, scramble_length, time_limit):
         '''
@@ -214,14 +220,27 @@ class AVI:
     def solve(self, cube, time_limit, scramble):
         attempt_solve(self.model_label, cube, time_limit, None, scramble)
 
-    def save(self, PATH):
+    def save(self, PATH, interrupted=False):
         '''
             save model checkpoint
 
             PATH: location to save model checkpoint
+            interrupted: indicate if save is due to an interrupt in training
         '''
-        torch.save({
-            'model_state_dict': self.model_train.state_dict(),
-            'optimizer_state_dict': self.optim_train.state_dict()
-        }, PATH)
-        print('saved model as', PATH)
+        if(interrupted):
+            name = 'model_avi_'+str(self.num_updates)+'_'+str(len(self.seen_states))
+            torch.save({
+                'model_train_state_dict': self.model_train.state_dict(),
+                'optim_train_state_dict': self.optim_train.state_dict(),
+                'model_label_state_dict': self.model_label.state_dict(),
+                'seen_states': self.seen_states,
+                'num_updates': self.num_updates
+            }, name)
+            print('saved model as', name)
+        else:
+            torch.save({
+                'model_train_state_dict': self.model_train.state_dict(),
+                'optim_train_state_dict': self.optim_train.state_dict(),
+                'num_updates': self.num_updates
+            }, PATH)
+            print('saved model as', PATH)

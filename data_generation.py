@@ -85,7 +85,7 @@ def generate_training_data_avi(num_scrambles, max_scramble_len):
     # for `num_scrambles` number of cubes
     for i in range(num_scrambles):
         # print progress
-        prog_print.print_progress('generating', i, num_scrambles)
+        prog_print.print_progress('\tgenerating', i, num_scrambles)
         cube.reset()
         # make a random number of turns between 1 and max_scramble_len
         scramble_len = random.randint(1, max_scramble_len)
@@ -95,5 +95,5 @@ def generate_training_data_avi(num_scrambles, max_scramble_len):
         # store cube state
         X.append(C.Cube(cube))
     # print completed progress
-    prog_print.print_progress_done('generated', num_scrambles)
+    prog_print.print_progress_done('\tgenerated', num_scrambles)
     return X

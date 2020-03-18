@@ -56,13 +56,14 @@ def main():
     parser = argparse.ArgumentParser(description = 'Run rl-cube')
     parser.add_argument('-p', '--periods', type=int, default=1, help='number of times to generate new training data')
     parser.add_argument('-e', '--epochs', type=int, default=50, help='number of times to evaluate all of the training data per period')
-    parser.add_argument('-n', '--number', type=int, default=100, help='number of cubes to scramble per data generation')
+    parser.add_argument('-n', '--num_cubes', type=int, default=100, help='number of cubes to scramble per data generation (adi)')
+    parser.add_argument('-s', '--num_scrambles', type=int, default=50000, help='number of scrambles per data generation (avi)')
     parser.add_argument('-l', '--length', type=int, default=30, help='length of each scramble')
     parser.add_argument('-r', '--learning_rate', type=float, default=0.01, help='learning rate of optimizer')
     parser.add_argument('-t', '--test', type=str, nargs='+', default='[none]', help='what kinds of tests to run (like `naive` or `mcts`)')
-    parser.add_argument('-m', '--max_updates', type=int, default=2, help='maximum number of times to update the labelling model during AVI')
+    parser.add_argument('-mu', '--max_updates', type=int, default=100, help='maximum number of times to update the labelling model during AVI')
     parser.add_argument('-b', '--batch_size', type=int, default=1000, help='batch size during training')
-    parser.add_argument('-lb', '--label_batch_size', type=int, default=1000, help='batch size for labelling training examples')
+    parser.add_argument('-lb', '--label_batch_size', type=int, default=7200, help='batch size for labelling training examples')
     parser.add_argument('-avi', '--approximate_value_iteration', action='store_true', default=False, help='use approximate value iteration method')
     parser.add_argument('--limit', type=int, default=5, help='time limit (in seconds) for each mcts solve attempt')
     parser.add_argument('--load', metavar='PATH', type=str, help='load model parameters from a file')
@@ -75,8 +76,10 @@ def main():
     PERIODS = args.periods
     # number of times to evaluate all of the training data per period
     EPOCHS = args.epochs
-    # number of scrambles per data generation
-    NUM_SCRAMBLES = args.number
+    # number of cubes per data generation (adi)
+    NUM_CUBES = args.num_cubes
+    # number of scrambles per data generation (avi)
+    NUM_SCRAMBLES = args.num_scrambles
     # length of each scramble
     SCRAMBLE_LENGTH = args.length
     # time limit for mcts solve attempt
@@ -104,7 +107,7 @@ def main():
 
         # train model
         if(args.train):
-            adi.fit(PERIODS, EPOCHS, NUM_SCRAMBLES, SCRAMBLE_LENGTH)
+            adi.fit(PERIODS, EPOCHS, NUM_CUBES, SCRAMBLE_LENGTH)
 
         # test model
         if('none' not in args.test):
@@ -167,5 +170,5 @@ if __name__ == "__main__":
         else:
             # save the interrupted model if it was supposed to be saved
             if(args.save):
-                avi.save('model_interrupt_avi')
+                avi.save('', True)
         sys.exit(0)
