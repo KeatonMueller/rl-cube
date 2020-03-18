@@ -80,6 +80,8 @@ class AVI:
         num_batches = ceil(len(samples) / label_batch_size)
         # empty tensor to store next states - input to network
         next_states = torch.empty(label_batch_size * 12, 480, device=device)
+        # False array indicating if a state was solved
+        is_solved = [False for _ in range(label_batch_size * 12)]
         # calculate number of samples
         num_samples = len(samples)
 
@@ -98,20 +100,30 @@ class AVI:
                         cube.idx_turn(idx)
                         # and store the state in next_states
                         next_states[num] = cube.to_tensor()
+                        # remember if this cube was solved
+                        is_solved[num] = cube.is_solved()
                         cube.idx_turn(idx, True)
                         num += 1
                 # calculate the outputs for all next_states
                 outputs = self.model_label(next_states)
                 # for each cube in the batch
                 for x in range(len(batch)):
-                    # calculate the min cost from the outputs
-                    min_cost = float('inf')
-                    for i in range(x * 12, x * 12 + 12):
-                        cost = 1 + outputs[i].item()
-                        if cost < min_cost:
-                            min_cost = cost
-                    # store the min cost as the label for cube x
-                    Y[b * label_batch_size + x] = min_cost
+                    # if cube was already solved
+                    if(batch[x].is_solved()):
+                        # set cost to 0
+                        Y[b * label_batch_size + x] = 0
+                    # otherwise
+                    else:
+                        # calculate the min cost from the outputs
+                        min_cost = float('inf')
+                        for i in range(x * 12, x * 12 + 12):
+                            # cost is just 1 if turn is to solved state
+                            # otherwise use network output
+                            cost = 1 if is_solved[i] else 1 + outputs[i].item()
+                            if cost < min_cost:
+                                min_cost = cost
+                        # store the min cost as the label for cube x
+                        Y[b * label_batch_size + x] = min_cost
             # print completed progress
             prog_print.print_progress_done('\tlabelled', num_samples)
         # return the labels
@@ -218,6 +230,13 @@ class AVI:
             a_star_test(self.model_label, scramble_length, time_limit)
 
     def solve(self, cube, time_limit, scramble):
+        '''
+            attempt to solve a cube using the current model_label ResCubeNet
+
+            cube: a Cube object to be solved
+            time_limit: the time allowed to try and solve it
+            scramble: the string representation of the scramble
+        '''
         attempt_solve(self.model_label, cube, time_limit, None, scramble)
 
     def save(self, PATH, interrupted=False):
