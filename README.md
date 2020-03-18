@@ -30,6 +30,7 @@ Afterwards, it is used as a heuristic for A* Search to try to solve the cube.
 
 ## How to Use It
 You need Python 3 and PyTorch to run this project. It is also recommend you use a CUDA enabled machine.
+If you want to download the pretrained models, you'll need [Git Large File Storage](https://git-lfs.github.com/ "Git LFS").
 
 To see a list of options for this project, clone this repo and run
 
