@@ -21,6 +21,11 @@ class AVI:
         class to implement approximate value iteration
     '''
     def __init__(self):
+        '''
+            initialize AVI class
+            initialize the training and labelling ResCubeNets and the optimizer
+            initialize num_updates and seen_states
+        '''
         self.model_train = ResCubeNet().to(device)
         self.optim_train = optim.Adam(self.model_train.parameters(), lr=0.01)
 
@@ -37,15 +42,19 @@ class AVI:
             PATH: path to model checkpoint
         '''
         checkpoint = torch.load(PATH, map_location=device)
-        self.num_updates = checkpoint['num_updates']
-        self.model_train.load_state_dict(checkpoint['model_train_state_dict'])
-        self.optim_train.load_state_dict(checkpoint['optim_train_state_dict'])
-        # check if loading from interrupted checkpoint
-        if('seen_states' in checkpoint):
-            self.seen_states = checkpoint['seen_states']
-            self.model_label.load_state_dict(checkpoint['model_label_state_dict'])
+        # check if loading a lightweight checkpoint
+        if(PATH[-5:] == 'lckpt'):
+            self.model_train.load_state_dict(checkpoint['model_train_state_dict'])
         else:
-            self.model_label.load_state_dict(checkpoint['model_train_state_dict'])
+            self.num_updates = checkpoint['num_updates']
+            self.model_train.load_state_dict(checkpoint['model_train_state_dict'])
+            self.optim_train.load_state_dict(checkpoint['optim_train_state_dict'])
+            # check if loading from interrupted checkpoint
+            if('seen_states' in checkpoint):
+                self.seen_states = checkpoint['seen_states']
+                self.model_label.load_state_dict(checkpoint['model_label_state_dict'])
+            else:
+                self.model_label.load_state_dict(checkpoint['model_train_state_dict'])
         self.model_label.eval()
         self.model_train.train()
         print('loaded', PATH)
@@ -92,16 +101,19 @@ class AVI:
                 prog_print.print_progress('\tlabelling', min(num_samples, b * label_batch_size + label_batch_size), num_samples)
                 # get the batch
                 batch = samples[b * label_batch_size : (b + 1) * label_batch_size]
+                # count number of cube next states processed
                 num = 0
                 # for each cube in the batch
                 for cube in batch:
-                    # make all 12 possible moves
+                    # for all 12 possible moves
                     for idx in range(12):
+                        # make the move
                         cube.idx_turn(idx)
-                        # and store the state in next_states
+                        # and store the resulting state in next_states
                         next_states[num] = cube.to_tensor()
                         # remember if this cube was solved
                         is_solved[num] = cube.is_solved()
+                        # undo the move
                         cube.idx_turn(idx, True)
                         num += 1
                 # calculate the outputs for all next_states
@@ -163,6 +175,7 @@ class AVI:
         total = X_batches.size()[0] * X_batches.size()[1]
         # train model
         self.model_train.train()
+        # for each epoch
         for e in range(epochs):
             # keep track of number of batches trained (for printing purposes)
             num = 0
@@ -188,17 +201,27 @@ class AVI:
             prog_print.print_progress_done(('\tepoch: ' + str(e)), total, end=('loss: ' + str(loss.item())))
 
     def train(self, epochs, num_scrambles, batch_size, label_batch_size, max_updates):
+        '''
+            train using approximate value iteration
+
+            epochs: number of epochs to train for
+            num_scrambles: number of scrambles to use for training
+            batch_size: batch size for training
+            label_batch_size: batch size for labelling input
+            max_updates: max number of times to update model_label before terminating
+        '''
         # check that the number of scrambles can be split into batches evenly
         # (this is up to the caller to ensure)
         if(num_scrambles % batch_size != 0):
             print(f'number of scrambles ({num_scrambles}) and batch size ({batch_size}) aren\'t compatible')
             exit()
 
+        # print current status before training begins
+        print('update', self.num_updates, 'seen', len(self.seen_states), 'states')
         # until we've hit the desired number of updates
         while(self.num_updates < max_updates):
             # generate Cube object samples
             samples = generate_training_data_avi(num_scrambles, 30)
-
             # convert them to tensors for input to network
             X = self.cubes_to_input(samples)
             # generate labels for the samples
@@ -217,31 +240,37 @@ class AVI:
                 self.model_label.load_state_dict(self.model_train.state_dict())
                 self.seen_states = set()
                 self.num_updates += 1
+                # save a lightweight checkpoint each update
+                torch.save({
+                    'model_train_state_dict': self.model_train.state_dict()
+                }, ('model_avi_'+str(self.num_updates)+'.lckpt'))
 
     def test(self, tests, scramble_length, time_limit):
         '''
-            perform requested tests of the model
+            perform requested tests of the current model_train ResCubeNet
 
             tests: list of test names
             scramble_length: length of scrambles to test
             time_limit: time to attempt each solve
         '''
         if('a_star' in tests):
-            a_star_test(self.model_label, scramble_length, time_limit)
+            a_star_test(self.model_train, scramble_length, time_limit)
 
     def solve(self, cube, time_limit, scramble):
         '''
-            attempt to solve a cube using the current model_label ResCubeNet
+            attempt to solve a cube using the current model_train ResCubeNet
 
             cube: a Cube object to be solved
             time_limit: the time allowed to try and solve it
             scramble: the string representation of the scramble
         '''
-        attempt_solve(self.model_label, cube, time_limit, None, scramble)
+        attempt_solve(self.model_train, cube, time_limit, None, scramble)
 
     def save(self, PATH, interrupted=False):
         '''
             save model checkpoint
+            if interrupted, save both models and seen_states, as well as a lightweight version
+            otherwise, only save one model (as both are identical)
 
             PATH: location to save model checkpoint
             interrupted: indicate if save is due to an interrupt in training
@@ -256,6 +285,11 @@ class AVI:
                 'num_updates': self.num_updates
             }, name)
             print('saved model as', name)
+            # also save a lightweight version just for testing performance
+            torch.save({
+                'model_train_state_dict': self.model_train.state_dict()
+            }, name[:-5]+'.lckpt')
+            print('saved lightweight model as', (name[:-5]+'.lckpt'))
         else:
             torch.save({
                 'model_train_state_dict': self.model_train.state_dict(),

@@ -31,7 +31,8 @@ Afterwards, it is used as a heuristic for A* Search to try to solve the cube.
 ## How to Use It
 You need Python 3 and PyTorch to run this project. It is also recommend you use a CUDA enabled machine.
 
-If you want to download the pretrained models, you'll need [Git Large File Storage](https://git-lfs.github.com/ "Git LFS").
+If you want to download any models with the `.ckpt` file extension (this doesn't apply to `.lckpt`),
+you'll need [Git Large File Storage](https://git-lfs.github.com/ "Git LFS") installed.
 
 To see a list of options for this project, clone this repo and run
 
@@ -40,7 +41,7 @@ To see a list of options for this project, clone this repo and run
 
 To type in scrambles for a pre-trained model to attempt to solve, run something like
 
-`python3 driver.py --load model_1200.ckpt --solve`
+`python3 driver.py --load model_1200.lckpt --solve`
 
 Note that as of this time, the model is still in the process of being
 trained. The time it takes to find solutions will vary depending on

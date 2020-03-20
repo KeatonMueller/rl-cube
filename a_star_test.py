@@ -1,6 +1,7 @@
 import torch
 from time import time
 from heapq import heappush, heappop
+import random
 
 import cube as C
 
@@ -152,7 +153,6 @@ def attempt_solve(model, start_cube, time_limit, stats, scramble, solve_num=-1):
     '''
     stats = stats if stats else { 'hits': 0, 'total': 0, 'time': 0, 'max': -1, 'fails': [] }
     batch_size = 1
-    start_time = time()
     push_count = 0
     open_set = []
     cube_to_path_cost = dict()
@@ -170,7 +170,8 @@ def attempt_solve(model, start_cube, time_limit, stats, scramble, solve_num=-1):
 
         heappush(open_set, (cube_to_f_score[start_cube], push_count, start_cube))
         push_count += 1
-
+        print('attempting', scramble, '...', end='\r')
+        start_time = time()
         while(time() - start_time < time_limit and len(open_set) > 0):
             # get batch of cubes from open set
             cubes = pop_batch(open_set, min(batch_size, len(open_set)))
