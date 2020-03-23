@@ -137,10 +137,20 @@ tmux running on giraffe
 
 ==== AVI RESULTS ====
 
-model_avi_2_1664785
-	- 1000 6-move scrambles, avg 0.04, max 0.10
-	- 1000 7-move scrambles, avg 0.10, max 0.75
-	- 999  8-move scrambles, avg 0.61, max 0.88, limit 5
-model_avi_3
-	- 1000 8-move scrambles, avg 0.12, max 0.95
-	- 1000 9-move scrambles, avg 0.72, max 6.83
+a_star batch size = 1
+	model_avi_2
+		- 1000 6-move scrambles, avg 0.04, max 0.10
+		- 1000 7-move scrambles, avg 0.10, max 0.75
+		- 999  8-move scrambles, avg 0.61, max 0.88, limit 5
+	model_avi_3
+		- 1000 8-move scrambles, avg 0.12, max 0.95
+		- 1000 9-move scrambles, avg 0.72, max 6.83
+	model_avi_4
+		- 1000  8-move scrambles, avg 0.06, max 0.58
+		- 1000  9-move scrambles, avg 0.12, max 0.83
+		- 1000 10-move scrambles, avg 0.72, max 7.15
+	model_avi_5
+		- 1000 10-move scrambles, avg 0.67, max 6.66
+
+
+One full update took 43391 seconds

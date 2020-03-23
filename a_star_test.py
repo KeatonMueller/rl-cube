@@ -27,6 +27,12 @@ idx_to_str = {
     11: 'B\'',
 }
 
+'''
+    number of nodes to pop off the priority queue per iteration
+    during A* search
+'''
+A_STAR_BATCH_SIZE = 1
+
 def a_star_test(model, length, time_limit):
     '''
         uses A* Search to test the network on scrambles of the requested length
@@ -152,7 +158,6 @@ def attempt_solve(model, start_cube, time_limit, stats, scramble, solve_num=-1):
         solve_num: (optional) the number solve being attempted
     '''
     stats = stats if stats else { 'hits': 0, 'total': 0, 'time': 0, 'max': -1, 'fails': [] }
-    batch_size = 1
     push_count = 0
     open_set = []
     cube_to_path_cost = dict()
@@ -174,7 +179,7 @@ def attempt_solve(model, start_cube, time_limit, stats, scramble, solve_num=-1):
         start_time = time()
         while(time() - start_time < time_limit and len(open_set) > 0):
             # get batch of cubes from open set
-            cubes = pop_batch(open_set, min(batch_size, len(open_set)))
+            cubes = pop_batch(open_set, min(A_STAR_BATCH_SIZE, len(open_set)))
             cubes_to_compute = []
             # for each popped cube
             for cube in cubes:
