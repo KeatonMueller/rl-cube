@@ -68,6 +68,8 @@ Results using mcts tests
 	- model_800
 		- 992  6-move scrambles, avg 1.63, max 68.60, limit 600
 		- 995  6-move scrambles, avg 1.29, max 29.36, limit 600
+	- model_1300
+		-
 
 	- v1 - original
 		- 3-move: 0.04 avg 0.22 max
@@ -151,6 +153,41 @@ a_star batch size = 1
 		- 1000 10-move scrambles, avg 0.72, max 7.15
 	model_avi_5
 		- 1000 10-move scrambles, avg 0.67, max 6.66
+	model_avi_7
+		- 1000 10-move scrambles, avg 0.13, max 2.24
+		- 1000 11-move scrambles, avg 0.36, max 6.78
+	model_avi_10
+		- 1000 10-move scrambles, avg 0.10, max 1.57
+		- 1000 11-move scrambles, avg 0.17, max 2.84
+		- 1000 12-move scrambles, avg 0.47, max 14.79
+		- 995  13-move scrambles, avg 1.57, max 25.53, limit 30
+	model_avi_12
+		- 1000 10-move scrambles, avg 0.09, max 0.55
+		- 1000 11-move scrambles, avg 0.17, max 2.99
+		- 1000 12-move scrambles, avg 0.37, max 6.44
+		- 994  13-move scrambles, avg 1.56, max 29.98, limit 30
+	model_avi_15
+		- 1000 12-move scrambles, avg 0.36, max 9.68
+	model_avi_20
+		- 1000 12-move scrambles, avg 0.36, max 5.33
+	model_avi_25
+		- 997  12-move scrambles, avg 0.36, max 8.45, limit 10
+	model_avi_34
+		- 1000 12-move scrambles, avg 0.32, max 4.91
+		- 1000 12-move scrambles, avg 0.27, max 3.78
 
 
-One full update took 43391 seconds
+One full update took (seconds)
+43391
+44026
+46184
+44346
+43562
+46513
+44570
+48199
+47267
+48667
+49995
+46655
+48502

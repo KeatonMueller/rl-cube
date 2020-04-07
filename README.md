@@ -23,28 +23,29 @@ Once the policy and value network is trained, it is used to guide a Monte-Carlo
 Tree Search to go from the scrambled to the solved state.
 
 ### Approximate Value Iteration
-Another method is introduced by Forest Agostinelli called Approximate Value Iteration.
+This project also implements a method called Deep Approximate Value Iteration by Forest Agostinelli.
 
-First a Cost-to-Go function is trained via reinforcement leraning.
+First, a Cost-to-Go function is trained via reinforcement learning.
 Afterwards, it is used as a heuristic for A* Search to try to solve the cube.
 
 ## How to Use It
 You need Python 3 and PyTorch to run this project. It is also recommend you use a CUDA enabled machine.
 
-If you want to download any models with the `.ckpt` file extension (this doesn't apply to `.lckpt`),
-you'll need [Git Large File Storage](https://git-lfs.github.com/ "Git LFS") installed.
-
 To see a list of options for this project, clone this repo and run
-
 
 `python3 driver.py --help`
 
 To type in scrambles for a pre-trained model to attempt to solve, run something like
 
-`python3 driver.py --load model_1300.lckpt --solve`
+`python3 driver.py --load model_1400.lckpt --solve`
+
+The above command will run the autodidactic iteration-based method. To try an approximate
+value iteration model, run something like
+
+`python3 driver.py -avi --load model_avi_34.lckpt --solve`
 
 Note that as of this time, the model is still in the process of being
 trained. The time it takes to find solutions will vary depending on
 machine it's run on, and it is not yet able to handle scrambles of
-arbitrary length. The current model performs reasonably well on scrambles
-up to a length of 6.
+arbitrary length. On my machine (with a GTX 1070 Ti) it can solve most
+12-move scrambles in under half a second.
