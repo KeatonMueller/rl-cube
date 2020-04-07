@@ -32,6 +32,13 @@ idx_to_str = {
     during A* search
 '''
 A_STAR_BATCH_SIZE = 1
+'''
+    parameter to weight A* search
+    scales the path cost (g term)
+    LAMBDA = 0 makes A* turn in greedy best-first search
+    LAMBDA = 1 is standard A* search
+'''
+LAMBDA = 1
 
 def a_star_test(model, length, time_limit):
     '''
@@ -108,14 +115,20 @@ def a_star_test_helper_random(model, cube, length, stats, time_limit):
     for i in range(1000):
         cube.reset()
         curr_scramble = ''
-        # make `length` random turns, preventing moves that undo the previous
-        prev_idx = -1
+        # make `length` random turns, preventing moves that return to a previous state
+        prev_states = set([cube])
         for j in range(length):
             idx = random.randint(0, 11)
-            while(idx_to_inv[idx] == prev_idx):
-                idx = random.randint(0, 11)
             cube.idx_turn(idx)
-            prev_idx = idx
+            # while we've seen this state before
+            while(cube in prev_states):
+                # undo the move
+                cube.idx_turn(idx, True)
+                # perform a new random move
+                idx = random.randint(0, 11)
+                cube.idx_turn(idx)
+            # remember this new state and update curr_scramble
+            prev_states.add(cube)
             curr_scramble = curr_scramble + ' ' + idx_to_str[idx]
         # attempt a solve
         attempt_solve(model, cube, time_limit, stats, curr_scramble, i)
@@ -208,7 +221,7 @@ def attempt_solve(model, start_cube, time_limit, stats, scramble, solve_num=-1):
                             cube_to_parent[neighbor] = (cube, idx)
                             # heuristic is 0 for solved cubes
                             cube_to_heuristic[neighbor] = 0
-                            cube_to_f_score[neighbor] = cube_to_path_cost[neighbor]
+                            cube_to_f_score[neighbor] = LAMBDA * cube_to_path_cost[neighbor]
                             heappush(open_set, (cube_to_f_score[neighbor], push_count, neighbor))
                             push_count += 1
                         # if it's not solved
@@ -225,7 +238,7 @@ def attempt_solve(model, start_cube, time_limit, stats, scramble, solve_num=-1):
                         if(tentative_path_cost < cube_to_path_cost[neighbor]):
                             cube_to_parent[neighbor] = (cube, idx)
                             cube_to_path_cost[neighbor] = tentative_path_cost
-                            cube_to_f_score[neighbor] = tentative_path_cost + cube_to_heuristic[neighbor]
+                            cube_to_f_score[neighbor] = (LAMBDA * tentative_path_cost) + cube_to_heuristic[neighbor]
                             if((cube_to_f_score[neighbor], neighbor) not in open_set):
                                 heappush(open_set, (cube_to_f_score[neighbor], push_count, neighbor))
                                 push_count += 1
@@ -240,7 +253,7 @@ def attempt_solve(model, start_cube, time_limit, stats, scramble, solve_num=-1):
             # update heuristic and f_scores
             for i, cube in enumerate(cubes_to_compute):
                 cube_to_heuristic[cube] = outputs[i].item()
-                cube_to_f_score[cube] = cube_to_path_cost[cube] + cube_to_heuristic[cube]
+                cube_to_f_score[cube] = (LAMBDA * cube_to_path_cost[cube]) + cube_to_heuristic[cube]
                 heappush(open_set, (cube_to_f_score[cube], push_count, cube))
                 push_count += 1
         print('failed solve', scramble)
