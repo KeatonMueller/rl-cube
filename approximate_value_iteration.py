@@ -3,6 +3,7 @@ import torch.optim as optim
 import torch.nn.functional as F
 import random, copy
 from math import ceil
+from time import time
 
 import cube as C
 from cube_net import ResCubeNet
@@ -215,7 +216,7 @@ class AVI:
         if(num_scrambles % batch_size != 0):
             print(f'number of scrambles ({num_scrambles}) and batch size ({batch_size}) aren\'t compatible')
             exit()
-
+        prev_time = None
         # print current status before training begins
         print('update', self.num_updates, 'seen', len(self.seen_states), 'states')
         # until we've hit the desired number of updates
@@ -237,13 +238,18 @@ class AVI:
             # if number exceeds threshold, update model_label
             if(len(self.seen_states) > STATES_PER_UPDATE):
                 print('updating model_label')
+                if prev_time:
+                    print('update took', (time() - prev_time), 'seconds')
+                prev_time = time()
                 self.model_label.load_state_dict(self.model_train.state_dict())
                 self.seen_states = set()
                 self.num_updates += 1
+                print('saving model_avi_'+str(self.num_updates)+'.lckpt')
                 # save a lightweight checkpoint each update
                 torch.save({
                     'model_train_state_dict': self.model_train.state_dict()
                 }, ('model_avi_'+str(self.num_updates)+'.lckpt'))
+
 
     def test(self, tests, scramble_length, time_limit):
         '''
