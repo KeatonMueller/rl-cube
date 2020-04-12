@@ -234,4 +234,6 @@ class Cube():
         '''
             assesses equality of two Cube objects
         '''
-        return self.arr == other.arr
+        if(type(other) is Cube):
+            return self.arr == other.arr
+        return False
