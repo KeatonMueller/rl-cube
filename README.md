@@ -46,6 +46,6 @@ value iteration model, run something like
 
 Note that as of this time, the model is still in the process of being
 trained. The time it takes to find solutions will vary depending on
-machine it's run on, and it is not yet able to handle scrambles of
+the machine it's run on, and it is not yet able to handle scrambles of
 arbitrary length. On my machine (with a GTX 1070 Ti) it can solve most
 12-move scrambles in under half a second.
