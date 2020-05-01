@@ -2,7 +2,7 @@ import torch
 import copy
 from enum import Enum
 
-import transformations
+import utils.transformations as transformations
 
 '''
     Face enum

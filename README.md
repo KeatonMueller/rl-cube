@@ -37,12 +37,12 @@ To see a list of options for this project, clone this repo and run
 
 To type in scrambles for a pre-trained model to attempt to solve, run something like
 
-`python3 driver.py --load model_1400.lckpt --solve`
+`python3 driver.py --load models/model_1400.lckpt --solve`
 
 The above command will run the autodidactic iteration-based method. To try an approximate
 value iteration model, run something like
 
-`python3 driver.py -avi --load model_avi_34.lckpt --solve`
+`python3 driver.py -avi --load models/model_avi_77.lckpt --solve`
 
 Note that as of this time, the model is still in the process of being
 trained. The time it takes to find solutions will vary depending on

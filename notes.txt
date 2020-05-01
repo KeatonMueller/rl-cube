@@ -175,7 +175,18 @@ a_star batch size = 1
 	model_avi_34
 		- 1000 12-move scrambles, avg 0.32, max 4.91
 		- 1000 12-move scrambles, avg 0.27, max 3.78
-
+	model_avi_44
+		-  998 12-move scrambles, avg 0.28, max 7.57, limit 10
+		- 1000 12-move scrambles, avg 0.27, max 7.21
+	model_avi_50
+		-  998 12-move scrambles, avg 0.29, max 7.60, limit 10
+		- 1000 12-move scrambles, avg 0.28, max 8.07
+	model_avi_65
+	  - 1000 12-move scrambles, avg 0.24, max 3.78
+		- 993  13-move scrambles, avg 0.64, max 9.32, limit 10
+	model_avi_74
+		- 999  12-move scrambles, avg 0.31, max 5.76, limit 10
+		- 1000 12-move scrambles, avg 0.29, max 6.69
 
 One full update took (seconds)
 43391
@@ -191,3 +202,7 @@ One full update took (seconds)
 49995
 46655
 48502
+47287
+44685
+43582
+44673

@@ -7,9 +7,9 @@ from time import time
 
 import cube as C
 from cube_net import ResCubeNet
-from data_generation import generate_training_data_avi
-from a_star_test import a_star_test, attempt_solve
-import progress_printer as prog_print
+from utils.data_generation import generate_training_data_avi
+from tests.a_star_test import a_star_test, attempt_solve
+import utils.progress_printer as prog_print
 
 # see 10,000,000 unique states before updating parameters
 STATES_PER_UPDATE = 10000000
@@ -248,7 +248,7 @@ class AVI:
                 # save a lightweight checkpoint each update
                 torch.save({
                     'model_train_state_dict': self.model_train.state_dict()
-                }, ('model_avi_'+str(self.num_updates)+'.lckpt'))
+                }, ('models/model_avi_'+str(self.num_updates)+'.lckpt'))
 
 
     def test(self, tests, scramble_length, time_limit):
@@ -282,7 +282,7 @@ class AVI:
             interrupted: indicate if save is due to an interrupt in training
         '''
         if(interrupted):
-            name = 'model_avi_'+str(self.num_updates)+'_'+str(len(self.seen_states))+'.ckpt'
+            name = 'models/model_avi_'+str(self.num_updates)+'_'+str(len(self.seen_states))+'.ckpt'
             torch.save({
                 'model_train_state_dict': self.model_train.state_dict(),
                 'optim_train_state_dict': self.optim_train.state_dict(),

@@ -6,10 +6,10 @@ import random
 
 import cube as C
 from cube_net import CubeNet
-from data_generation import generate_training_data_adi
-from naive_test import naive_test
-from mcts_test import mcts_test, attempt_solve
-import progress_printer as prog_print
+from utils.data_generation import generate_training_data_adi
+from tests.naive_test import naive_test
+from tests.mcts_test import mcts_test, attempt_solve
+import utils.progress_printer as prog_print
 
 # device for CPU or GPU calculations
 device = torch.device('cuda:0') if torch.cuda.is_available() else torch.device('cpu')
