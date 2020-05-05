@@ -158,6 +158,18 @@ def main():
         if(args.save):
             avi.save(args.save)
 
+def solve_scramble(scramble):
+    cube = C.Cube()
+    scramble = scramble.split(' ')
+    for move in scramble:
+        cube.idx_turn(move_to_idx[move])
+    avi.solve(cube, TIME_LIMIT, ' '.join(scramble))
+
+def avi_init():
+    global avi
+    avi = AVI()
+    avi.load('models\\model_avi_82.lckpt')
+
 if __name__ == "__main__":
     try:
         main()
@@ -172,3 +184,6 @@ if __name__ == "__main__":
             if(args.save):
                 avi.save('', True)
         sys.exit(0)
+else:
+    # if not being run as main, initialize AVI
+    avi_init()

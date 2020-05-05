@@ -270,7 +270,7 @@ class AVI:
             time_limit: the time allowed to try and solve it
             scramble: the string representation of the scramble
         '''
-        attempt_solve(self.model_train, cube, time_limit, None, scramble)
+        return attempt_solve(self.model_train, cube, time_limit, None, scramble)
 
     def save(self, PATH, interrupted=False):
         '''

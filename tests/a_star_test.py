@@ -31,14 +31,19 @@ idx_to_str = {
     number of nodes to pop off the priority queue per iteration
     during A* search
 '''
-A_STAR_BATCH_SIZE = 1
+A_STAR_BATCH_SIZE = 10
 '''
     parameter to weight A* search
     scales the path cost (g term)
     LAMBDA = 0 makes A* turn in greedy best-first search
     LAMBDA = 1 is standard A* search
 '''
-LAMBDA = 1
+LAMBDA = .8
+
+'''
+    number of cubes to randomly scramble when doing A* test
+'''
+NUM_RANDOM_CUBES = 1000
 
 def a_star_test(model, length, time_limit):
     '''
@@ -101,7 +106,7 @@ def a_star_test_helper_all(model, cube, curr_len, orig_len, stats, time_limit, c
 
 def a_star_test_helper_random(model, cube, length, stats, time_limit):
     '''
-        randomly scrambles 1000 cubes `length` times and then attempts
+        randomly scrambles cubes `length` times and then attempts
         to solve them
 
         model: a ResCubeNet network
@@ -111,8 +116,8 @@ def a_star_test_helper_random(model, cube, length, stats, time_limit):
         time_limit: the time limit for each mcts attempt at solving a cube
     '''
     idx_to_inv = { 0: 1, 1: 0, 2: 3, 3: 2, 4: 5, 5: 4, 6: 7, 7: 6, 8: 9, 9: 8, 10: 11, 11: 10 }
-    # try to solve 1000 randomly scrambled cubes
-    for i in range(1000):
+    # try to solve randomly scrambled cubes
+    for i in range(NUM_RANDOM_CUBES):
         cube.reset()
         curr_scramble = ''
         # make `length` random turns, preventing moves that return to a previous state
@@ -206,8 +211,9 @@ def attempt_solve(model, start_cube, time_limit, stats, scramble, solve_num=-1):
                     length = len(scramble.split(' ')) * 3 - 1
                     if(solve_num >= 0):
                         print('{0:>5}'.format(str(solve_num)+':'), end=' ')
-                    print(('solved {0:<'+str(length)+'}').format(scramble), '=>  ', ('{0:<'+str(length)+'}').format(get_solution(cube, '', cube_to_parent)), str(round(solve_time, 2)))
-                    return
+                    solution = get_solution(cube, '', cube_to_parent)
+                    print(('solved {0:<'+str(length)+'}').format(scramble), '=>  ', ('{0:<'+str(length)+'}').format(solution), str(round(solve_time, 2)))
+                    return solution
                 # get all 12 neighboring Cube objects
                 neighbors = C.get_neighbors(cube)
                 # for each neighbor
@@ -259,3 +265,4 @@ def attempt_solve(model, start_cube, time_limit, stats, scramble, solve_num=-1):
         print('failed solve', scramble)
         stats['fails'].append(scramble)
         stats['total'] += 1
+        return None
